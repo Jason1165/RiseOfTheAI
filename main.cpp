@@ -4,8 +4,8 @@
 #define GL_GLEXT_PROTOTYPES 1
 #define FIXED_TIMESTEP 0.0166666f
 #define ENEMY_COUNT 1
-#define LEVEL1_WIDTH 14
-#define LEVEL1_HEIGHT 5
+#define LEVEL1_WIDTH 29
+#define LEVEL1_HEIGHT 12
 
 #ifdef _WINDOWS
 #include <GL/glew.h>
@@ -58,7 +58,7 @@ F_SHADER_PATH[] = "shaders/fragment_textured.glsl";
 const float MILLISECONDS_IN_SECOND = 1000.0;
 
 const char SPRITESHEET_FILEPATH[] = "assets/george_0.png",
-MAP_TILESET_FILEPATH[] = "assets/tileset.png",
+MAP_TILESET_FILEPATH[] = "assets/cake_sheet.png",
 BGM_FILEPATH[] = "assets/dooblydoo.mp3",
 JUMP_SFX_FILEPATH[] = "assets/bounce.wav";
 
@@ -68,11 +68,18 @@ const GLint TEXTURE_BORDER = 0;
 
 unsigned int LEVEL_1_DATA[] =
 {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-    1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1,
-    2, 2, 1, 1, 0, 0, 1, 1, 1, 2, 2, 2, 2, 2,
-    2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 13, 14, 0, 0, 3, 13, 13, 13, 13, 13, 13, 13, 2, 0, 0, 0, 0, 0, 1,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 1,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 1, 0, 0, 1,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 7, 7, 8, 0, 0, 0, 0, 0, 1,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 4, 13, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 12, 14, 0, 0, 0, 0, 0, 1, 1,
+0, 0, 0, 0, 0, 12, 13, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 13, 1, 1, 13, 14, 0, 0, 0, 0, 1,
+12, 13, 13, 14, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 12, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+1, 1, 1, 1, 0, 1, 1, 1, 0, 6, 7, 8, 0, 0, 12, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 13, 1
 };
 
 // ————— VARIABLES ————— //
@@ -137,6 +144,7 @@ void initialise()
 
     m_view_matrix = glm::mat4(1.0f);
     m_projection_matrix = glm::ortho(-5.0f, 5.0f, -3.75f, 3.75f, -1.0f, 1.0f);
+    m_projection_matrix = m_projection_matrix * 5.0f;
 
     m_program.set_projection_matrix(m_projection_matrix);
     m_program.set_view_matrix(m_view_matrix);
@@ -147,7 +155,7 @@ void initialise()
 
     // ————— MAP SET-UP ————— //
     GLuint map_texture_id = load_texture(MAP_TILESET_FILEPATH);
-    g_state.map = new Map(LEVEL1_WIDTH, LEVEL1_HEIGHT, LEVEL_1_DATA, map_texture_id, 1.0f, 4, 1);
+    g_state.map = new Map(LEVEL1_WIDTH, LEVEL1_HEIGHT, LEVEL_1_DATA, map_texture_id, 1.0f, 4, 4);
 
     // ————— GEORGE SET-UP ————— //
     // Existing
@@ -175,7 +183,7 @@ void initialise()
     g_state.player->set_width(0.8f);
 
     // Jumping
-    g_state.player->m_jumping_power = 5.0f;
+    g_state.player->set_jumping_power(5.0f);
 
 
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
@@ -211,7 +219,7 @@ void process_input()
                 m_game_is_running = false;
                 break;
 
-            case SDLK_SPACE:
+            case SDLK_UP:
                 // Jump
                 if (g_state.player->m_collided_bottom)
                 {
@@ -271,8 +279,9 @@ void update()
 
     m_accumulator = delta_time;
 
+    // changing view matrix
     m_view_matrix = glm::mat4(1.0f);
-    m_view_matrix = glm::translate(m_view_matrix, glm::vec3(-g_state.player->get_position().x, 0.0f, 0.0f));
+    m_view_matrix = glm::translate(m_view_matrix, glm::vec3(-g_state.player->get_position().x, -g_state.player->get_position().y, 0.0f));
     m_program.set_view_matrix(m_view_matrix);
 }
 
