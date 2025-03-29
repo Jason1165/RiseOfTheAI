@@ -7,6 +7,7 @@
 enum EntityType { PLATFORM, PLAYER, ENEMY };
 enum AIType { WALKER, GUARD };
 enum AIState { WALKING, IDLE, ATTACKING };
+enum JumpState { NONE, SINGLE, DOUBLE };
 
 
 enum AnimationDirection { LEFT, RIGHT, UP, DOWN };
@@ -16,7 +17,7 @@ class Entity
 private:
     bool m_is_active = true;
 
-    int m_walking[4][4]; // 4x4 array for walking animations
+    std::vector<std::vector<int>> m_walking;
 
 
     EntityType m_entity_type;
@@ -34,7 +35,8 @@ private:
     float       m_speed,
                 m_jumping_power;
 
-    bool m_is_jumping;
+    bool m_is_jumping = false;
+    JumpState m_jump_state = NONE;
 
     // ————— TEXTURES ————— //
     GLuint    m_texture_id;
@@ -45,24 +47,28 @@ private:
         m_animation_index,
         m_animation_rows;
 
-    int* m_animation_indices = nullptr;
+    std::vector<int> m_animation_indices = {};
     float m_animation_time = 0.0f;
 
     float m_width = 1.0f,
         m_height = 1.0f;
+
     // ————— COLLISIONS ————— //
     bool m_collided_top = false;
     bool m_collided_bottom = false;
     bool m_collided_left = false;
     bool m_collided_right = false;
 
+    glm::vec3 m_left_collider;
+    glm::vec3 m_right_collider;
+
 public:
     // ————— STATIC VARIABLES ————— //
-    static constexpr int SECONDS_PER_FRAME = 4;
+    static constexpr int SECONDS_PER_FRAME = 36; // FIGURE OUT HOW TO MAKE THIS INTO A MEMBER
 
     // ————— METHODS ————— //
     Entity();
-    Entity(GLuint texture_id, float speed, glm::vec3 acceleration, float jump_power, int walking[4][4], float animation_time,
+    Entity(GLuint texture_id, float speed, glm::vec3 acceleration, float jump_power, std::vector<std::vector<int>>, float animation_time,
         int animation_frames, int animation_index, int animation_cols,
         int animation_rows, float width, float height, EntityType EntityType);
     Entity(GLuint texture_id, float speed, float width, float height, EntityType EntityType); // Simpler constructor
@@ -72,14 +78,14 @@ public:
     void draw_sprite_from_texture_atlas(ShaderProgram* program, GLuint texture_id, int index);
     bool const check_collision(Entity* other) const;
 
-    void const check_collision_y(Entity* collidable_entities, int collidable_entity_count);
-    void const check_collision_x(Entity* collidable_entities, int collidable_entity_count);
+    bool const check_collision_y(Entity* collidable_entities, int collidable_entity_count);
+    bool const check_collision_x(Entity* collidable_entities, int collidable_entity_count);
 
     // Overloading our methods to check for only the map
     void const check_collision_y(Map* map);
     void const check_collision_x(Map* map);
 
-    void update(float delta_time, Entity* player, Entity* collidable_entities, int collidable_entity_count, Map* map);
+    bool update(float delta_time, Entity* player, Entity* collidable_entities, int collidable_entity_count, Map* map);
     void render(ShaderProgram* program);
 
     void ai_activate(Entity* player);
@@ -98,12 +104,15 @@ public:
     void move_up() { m_movement.y = 1.0f;  face_up(); }
     void move_down() { m_movement.y = -1.0f; face_down(); }
 
-    void const jump() { m_is_jumping = true; }
+    void const jump() { 
+        m_is_jumping = true; 
+    }
 
     // ————— GETTERS ————— //
-    EntityType const get_entity_type()    const { return m_entity_type; };
-    AIType     const get_ai_type()        const { return m_ai_type; };
-    AIState    const get_ai_state()       const { return m_ai_state; };
+    EntityType const get_entity_type()    const { return m_entity_type; }
+    AIType     const get_ai_type()        const { return m_ai_type; }
+    AIState    const get_ai_state()       const { return m_ai_state; }
+    JumpState  const get_jump_state()     const { return m_jump_state; }
     float const get_jumping_power() const { return m_jumping_power; }
     glm::vec3 const get_position()     const { return m_position; }
     glm::vec3 const get_velocity()     const { return m_velocity; }
@@ -116,13 +125,16 @@ public:
     bool      const get_collided_bottom() const { return m_collided_bottom; }
     bool      const get_collided_right() const { return m_collided_right; }
     bool      const get_collided_left() const { return m_collided_left; }
+    glm::vec3 const get_right_collider() const{ return m_right_collider; }
+    glm::vec3 const get_left_collider() const { return m_left_collider; }
 
     void activate() { m_is_active = true; };
     void deactivate() { m_is_active = false; };
     // ————— SETTERS ————— //
-    void const set_entity_type(EntityType new_entity_type) { m_entity_type = new_entity_type; };
-    void const set_ai_type(AIType new_ai_type) { m_ai_type = new_ai_type; };
-    void const set_ai_state(AIState new_state) { m_ai_state = new_state; };
+    void const set_entity_type(EntityType new_entity_type) { m_entity_type = new_entity_type; }
+    void const set_ai_type(AIType new_ai_type) { m_ai_type = new_ai_type; } 
+    void const set_ai_state(AIState new_state) { m_ai_state = new_state; }
+    void const set_jump_state(JumpState new_state) { m_jump_state = new_state; }
     void const set_position(glm::vec3 new_position) { m_position = new_position; }
     void const set_velocity(glm::vec3 new_velocity) { m_velocity = new_velocity; }
     void const set_acceleration(glm::vec3 new_acceleration) { m_acceleration = new_acceleration; }
@@ -138,17 +150,13 @@ public:
     void const set_jumping_power(float new_jumping_power) { m_jumping_power = new_jumping_power; }
     void const set_width(float new_width) { m_width = new_width; }
     void const set_height(float new_height) { m_height = new_height; }
+    void const set_left_collider(glm::vec3 new_left) { m_left_collider = new_left; }
+    void const set_right_collider(glm::vec3 new_right) { m_right_collider = new_right; }
 
     // Setter for m_walking
-    void set_walking(int walking[4][4])
+    void set_walking(std::vector<std::vector<int>>& walking)
     {
-        for (int i = 0; i < 4; ++i)
-        {
-            for (int j = 0; j < 4; ++j)
-            {
-                m_walking[i][j] = walking[i][j];
-            }
-        }
+        m_walking = walking; // could do it in the constructor but whatever
     }
 };
 
