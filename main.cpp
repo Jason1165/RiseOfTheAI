@@ -1,8 +1,9 @@
 //#define GL_SILENCE_DEPRECATION
 //#define STB_IMAGE_IMPLEMENTATION
-#define LOG(argument) std::cout << argument << '\n'
 //#define GL_GLEXT_PROTOTYPES 1
+#define LOG(argument) std::cout << argument << '\n'
 #define FIXED_TIMESTEP 0.0166666f
+#define FIXED_JUMPTIME 0.5f
 
 #ifdef _WINDOWS
 #include <GL/glew.h>
@@ -25,8 +26,9 @@
 #include "LevelA.h"
 
 // ————— CONSTANTS ————— //
-const int WINDOW_WIDTH = 640,
-WINDOW_HEIGHT = 480;
+const float MULTI = 1.5f;
+const int WINDOW_WIDTH = 640 * MULTI,
+WINDOW_HEIGHT = 480 * MULTI;
 
 const float BG_RED = 0.1922f,
 BG_BLUE = 0.549f,
@@ -56,21 +58,6 @@ const GLint TEXTURE_BORDER = 0;
 
 enum AppStatus { RUNNING, TERMINATED };
 
-unsigned int LEVEL_1_DATA[] =
-{
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 13, 14, 0, 0, 3, 13, 13, 13, 13, 13, 13, 13, 2, 0, 0, 0, 0, 0, 1,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 1,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 1, 0, 0, 1,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 7, 7, 8, 0, 0, 0, 0, 0, 1,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 4, 13, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 12, 14, 0, 0, 0, 0, 0, 1, 1,
-    0, 0, 0, 0, 0, 12, 13, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 13, 1, 1, 13, 14, 0, 0, 0, 0, 1,
-    12, 13, 13, 14, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 12, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 1, 1, 1, 0, 1, 1, 1, 0, 6, 7, 8, 0, 0, 12, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 13, 1
-};
 
 // ————— VARIABLES ————— //
 Scene* g_current_scene;
@@ -86,11 +73,14 @@ glm::mat4 g_view_matrix, g_projection_matrix;
 
 float g_previous_ticks = 0.0f;
 float g_accumulator = 0.0f;
+float g_last_jump = 0.0f; // measures time since last jump
 bool g_is_colliding_bottom = false;
+
+int GAME_LIVES = 3;
 
 
 // PROTOTYPES
-void swtich_to_scene(Scene* scene);
+void switch_to_scene(Scene* scene);
 void initialise();
 void process_input();
 void update();
@@ -104,8 +94,6 @@ void switch_to_scene(Scene* scene)
     g_current_scene = scene;
     g_current_scene->initialise(); // DON'T FORGET THIS STEP!
 }
-
-
 
 void initialise()
 {
@@ -141,7 +129,6 @@ void initialise()
 
     // ————— MAP SET-UP ————— //
     g_levelA = new LevelA();
-    
     g_levels[0] = g_levelA;
 
     switch_to_scene(g_levels[0]);
@@ -182,16 +169,24 @@ void process_input()
                 // Quit the game with a keystroke
                 g_app_status = TERMINATED;
                 break;
-
-            case SDLK_UP:
+            case SDLK_SPACE:
+            case SDLK_UP: { // creating scope 
                 // Jump
-                if (g_current_scene->get_state().player->get_collided_bottom())
+                float ticks_jump = (float)SDL_GetTicks() / MILLISECONDS_IN_SECOND;
+                float delta_jump = ticks_jump - g_last_jump;
+                g_last_jump = ticks_jump;
+                if (delta_jump > FIXED_JUMPTIME && g_current_scene->get_state().player->get_collided_bottom())
                 {
+                    g_current_scene->get_state().player->set_jump_state(SINGLE);
                     g_current_scene->get_state().player->jump();
                     //Mix_PlayChannel(-1, g_state.jump_sfx, 0);
                 }
+                else if (delta_jump > FIXED_JUMPTIME && g_current_scene->get_state().player->get_jump_state() == SINGLE) {
+                    g_current_scene->get_state().player->set_jump_state(DOUBLE);
+                    g_current_scene->get_state().player->jump();
+                }
                 break;
-
+            }
             default:
                 break;
             }
