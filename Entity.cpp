@@ -47,20 +47,26 @@ void Entity::ai_guard(Entity* player)
     switch (m_ai_state) {
     case IDLE:
         if (glm::distance(m_position, player->get_position()) < 5.0f && fabs(m_position.y - player->get_position().y) < 0.5f) {
-            m_ai_state = WALKING;
+            m_ai_state = CHARGE;
+            if (player->get_position().x < m_position.x) {
+                m_movement = glm::vec3(-0.1f, 0.0f, 0.0f);
+                m_acceleration.y = -100.0f; // just to make sure they fall to their death ...
+            }
         }
         break;
 
-    case WALKING:
-        if (m_position.x > player->get_position().x) {
-            m_movement = glm::vec3(-1.0f, 0.0f, 0.0f);
-        }
-        else {
-            m_movement = glm::vec3(1.0f, 0.0f, 0.0f);
+    case CHARGE:
+        m_movement.x += -0.01f;
+        if (glm::distance(m_position, player->get_position()) > 15.0f) {
+            m_ai_state = DEATH;
         }
         break;
 
-    case ATTACKING:
+    case DEATH:
+        m_movement = glm::vec3(0.0f);
+        m_acceleration = glm::vec3(0.0f);
+        // pausing all possibility of movement just in case it overflows on me and causes weird bugs
+        // don't know if it does but this is a safety net although it still animates
         break;
 
     default:

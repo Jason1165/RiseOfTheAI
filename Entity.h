@@ -5,8 +5,16 @@
 #include "glm/glm.hpp"
 #include "ShaderProgram.h"
 enum EntityType { PLATFORM, PLAYER, ENEMY };
+/*
+    WALKER:     walks left and right with no perception of enemy
+    GUARD:      Starts moving when it sees the enemy
+                IDLE:   Standing there
+                CHARGE: Charges in direction of where it first senses Player
+                        with no regard with death
+            
+*/
 enum AIType { WALKER, GUARD };
-enum AIState { WALKING, IDLE, ATTACKING };
+enum AIState { IDLE, CHARGE, DEATH };
 enum JumpState { NONE, SINGLE, DOUBLE };
 
 

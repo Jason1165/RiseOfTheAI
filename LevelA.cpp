@@ -5,7 +5,8 @@
 #define LEVEL_HEIGHT 20
 
 constexpr char PLAYER_FILEPATH[] = "assets/char_run.png";
-constexpr char ENEMY_FILEPATH[] = "assets/angry_pig.png";
+constexpr char PIG_FILEPATH[] = "assets/angry_pig.png";
+constexpr char CHICKEN_FILEPATH[] = "assets/chicken.png";
 
 
 unsigned int LEVELA_DATA[] =
@@ -63,7 +64,7 @@ void LevelA::initialise()
         player_texture_id,         // texture id
         2.0f,                      // speed
         acceleration,              // acceleration
-        3.5f,                      // jumping power
+        3.75f,                      // jumping power
         player_walking_animation,  // animation index sets
         0.0f,                      // animation time
         18,                        // animation frame amount
@@ -79,23 +80,25 @@ void LevelA::initialise()
     m_game_state.player->set_scale(glm::vec3(1.0f, 0.75f, 0.0f));
 
     // -- ENEMIES -- //
-    GLuint enemy_texture_id = Utility::load_texture(ENEMY_FILEPATH);
+    GLuint pig_texture_id = Utility::load_texture(PIG_FILEPATH);
+    GLuint chicken_texture_id = Utility::load_texture(CHICKEN_FILEPATH);
+
 
     m_game_state.enemies = new Entity[LEVELA_ENEMY_COUNT];
 
-    // ENEMY_ONE
-    std::vector<std::vector<int>> enemy_walking_animation =
+    // ENEMY_ZERO
+    std::vector<std::vector<int>> pig_walking_animation =
     {
         {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, // LEFT
-        { 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 } // RIGHT
+        {12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 } // RIGHT
     };
 
     m_game_state.enemies[0] = Entity(
-        enemy_texture_id,          // texture id
+        pig_texture_id,            // texture id
         1.0f,                      // speed
         acceleration,              // acceleration
         0.0f,                      // jumping power
-        enemy_walking_animation,   // animation index sets
+        pig_walking_animation,     // animation index sets
         0.0f,                      // animation time
         12,                        // animation frame amount
         0,                         // current animation index
@@ -109,9 +112,62 @@ void LevelA::initialise()
     m_game_state.enemies[0].set_position(glm::vec3(26.0f, -10.0f, 0.0f));
     m_game_state.enemies[0].set_left_collider(glm::vec3(24.0f, -10.0f, 0.0f));
     m_game_state.enemies[0].set_right_collider(glm::vec3(29.0f, -10.0f, 0.0f));
-    m_game_state.enemies[0].set_ai_type(WALKER);
-    m_game_state.enemies[0].set_ai_state(ATTACKING);
     m_game_state.enemies[0].set_movement(glm::vec3(-1.0f, 0.0f, 0.0f));
+    m_game_state.enemies[0].set_ai_type(WALKER);
+
+
+    // ENEMY_ONE
+    std::vector<std::vector<int>> chicken_walking_animation =
+    {
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}, // LEFT
+        {12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 } // RIGHT
+    };
+
+    m_game_state.enemies[1] = Entity(
+        chicken_texture_id,          // texture id
+        1.0f,                      // speed
+        acceleration,              // acceleration
+        0.0f,                      // jumping power
+        chicken_walking_animation,   // animation index sets
+        0.0f,                      // animation time
+        14,                        // animation frame amount
+        0,                         // current animation index
+        14,                        // animation column amount
+        2,                         // animation row amount
+        1.0f,                      // width
+        1.0f,                      // height
+        ENEMY
+    );
+
+    m_game_state.enemies[1].set_position(glm::vec3(29.0f, -15.0f, 0.0f));
+    m_game_state.enemies[1].set_movement(glm::vec3(0.0f, 0.0f, 0.0f));
+    m_game_state.enemies[1].face_left();
+    m_game_state.enemies[1].set_ai_type(GUARD);
+    m_game_state.enemies[1].set_ai_state(IDLE);
+
+    // ENEMY_TWO
+    m_game_state.enemies[2] = Entity(
+        pig_texture_id,            // texture id
+        1.0f,                      // speed
+        acceleration,              // acceleration
+        0.0f,                      // jumping power
+        pig_walking_animation,     // animation index sets
+        0.0f,                      // animation time
+        12,                        // animation frame amount
+        0,                         // current animation index
+        12,                        // animation column amount
+        2,                         // animation row amount
+        1.0f,                      // width
+        1.0f,                      // height
+        ENEMY
+    );
+
+    m_game_state.enemies[2].set_position(glm::vec3(16.0f, -9.0f, 0.0f));
+    m_game_state.enemies[2].set_left_collider(glm::vec3(12.0f, -9.0f, 0.0f));
+    m_game_state.enemies[2].set_right_collider(glm::vec3(21.0f, -9.0f, 0.0f));
+    m_game_state.enemies[2].set_movement(glm::vec3(-1.0f, 0.0f, 0.0f));
+    m_game_state.enemies[2].set_ai_type(WALKER);
+
 
 
     /**
@@ -134,8 +190,6 @@ void LevelA::update(float delta_time)
     for (int i = 0; i < LEVELA_ENEMY_COUNT; i++) {
         m_game_state.enemies[i].update(delta_time, m_game_state.player, nullptr, 0, m_game_state.map);
     }
-
-    //std::cout << m_game_state.player->get_position().x << " " << m_game_state.player->get_position().y << std::endl;
 
     //if (m_game_state.player->get_position().y < -10.0f) m_game_state.next_scene_id = 0;
 }
