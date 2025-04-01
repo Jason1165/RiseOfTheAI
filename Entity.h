@@ -6,16 +6,20 @@
 #include "ShaderProgram.h"
 enum EntityType { PLATFORM, PLAYER, ENEMY };
 /*
-    WALKER:     walks left and right with no perception of enemy
-    GUARD:      Starts moving when it sees the enemy
-                IDLE:   Standing there
-                CHARGE: Charges in direction of where it first senses Player
-                        with no regard with death
-    FLYER:      movement in a sinusoidal pattern between two points
-            
+    WALKER:     walks left and right between two bounds with no perception of Player
+    GUARD:      Starts moving when it sees the Player
+                IDLE:       Standing there
+                CHARGE:     Charges in direction of where it first senses Player
+                            with no regard to death
+    FLYER:      movement in a zigzag pattern between two boundaries
+    FALLER:     idk what else to call it but they fall from the sky or somewhere
+                IDLE:       Waiting for the Player to appear
+                CHARGE:     We going straight down
+                RECHARGE:   Gotta go back up and once we back up there we ready again
+
 */
-enum AIType { WALKER, GUARD, FLYER };
-enum AIState { IDLE, CHARGE, DEATH };
+enum AIType { WALKER, GUARD, FLYER, FALLER };
+enum AIState { IDLE, CHARGE, DEATH, RECHARGE };
 enum JumpState { ZERO, SINGLE, DOUBLE };
 
 
@@ -100,7 +104,8 @@ public:
     void ai_activate(Entity* player, float delta_time);
     void ai_walk();
     void ai_guard(Entity* player);
-    void ai_flyer(float delta_time);
+    void ai_flyer();
+    void ai_faller(Entity* player);
 
     void normalise_movement() { m_movement = glm::normalize(m_movement); }
 
@@ -168,6 +173,9 @@ public:
     {
         m_walking = walking; // could do it in the constructor but whatever
     }
+
+    // CHEATS CAUSE I NEED THEM
+    void let_me_move_faster(float multi){ m_movement.x *= multi;}
 };
 
 #endif // ENTITY_H

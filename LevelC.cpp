@@ -8,6 +8,7 @@ constexpr char PLAYER_FILEPATH[] = "assets/char_run.png";
 constexpr char PIG_FILEPATH[] = "assets/angry_pig.png";
 constexpr char CHICKEN_FILEPATH[] = "assets/chicken.png";
 constexpr char BAT_FILEPATH[] = "assets/bat.png";
+constexpr char BEE_FILEPATH[] = "assets/bee.png";
 glm::vec3 LEVELC_END_FLAG = glm::vec3(48.0f, -3.0f, 0.0f);
 
 
@@ -95,6 +96,7 @@ void LevelC::initialise()
     GLuint pig_texture_id = Utility::load_texture(PIG_FILEPATH);
     GLuint chicken_texture_id = Utility::load_texture(CHICKEN_FILEPATH);
     GLuint bat_texture_id = Utility::load_texture(BAT_FILEPATH);
+    GLuint bee_texture_id = Utility::load_texture(BEE_FILEPATH);
 
 
     m_game_state.enemies = new Entity[LEVELC_ENEMY_COUNT];
@@ -190,7 +192,6 @@ void LevelC::initialise()
     m_game_state.enemies[10].set_right_collider(glm::vec3(27.0f, -24.0f, 0.0f));
     m_game_state.enemies[10].set_movement(glm::vec3(1.0f, 0.0f, 0.0f));
     m_game_state.enemies[10].set_ai_type(WALKER);
-    m_game_state.enemies[10].set_scale(glm::vec3(0.25f));
 
     m_game_state.enemies[11].set_position(glm::vec3(31.0f, -25.0f, 0.0f));
     m_game_state.enemies[11].set_left_collider(glm::vec3(28.0f, -25.0f, 0.0f));
@@ -204,6 +205,7 @@ void LevelC::initialise()
     m_game_state.enemies[12].set_movement(glm::vec3(1.0f, 0.0f, 0.0f));
     m_game_state.enemies[12].set_ai_type(WALKER);
 
+    // ENEMY 13 BAT
     std::vector<std::vector<int>> bat_walking_animation =
     {
         {0, 1, 2, 3, 4, 5, 6}, // LEFT
@@ -235,6 +237,73 @@ void LevelC::initialise()
     m_game_state.enemies[13].set_ai_type(FLYER);
 
 
+    // ENEMY 14 - 25 BEEEEEEEEEEEES
+    std::vector<std::vector<int>> bee_walking_animation = {
+        {0, 1, 2, 3, 4, 5, 6, 7},
+        {0, 1, 2, 3, 4, 5, 6, 7}
+    };
+
+    for (int i = 0; i < 12; i++) {
+        m_game_state.enemies[14+i] = Entity(
+            bee_texture_id,            // texture id
+            1.0f,                      // speed
+            glm::vec3(0.0f),           // acceleration
+            0.0f,                      // jumping power
+            bee_walking_animation,     // animation index sets
+            0.0f,                      // animation time
+            8,                         // animation frame amount
+            0,                         // current animation index
+            8,                         // animation column amount
+            1,                         // animation row amount
+            0.5f,                      // width
+            0.5f,                      // height
+            ENEMY
+        );
+
+        m_game_state.enemies[14 + i].set_position(glm::vec3(22.0f + (1.0f * i), -2.0f, 0.0f));
+        m_game_state.enemies[14 + i].set_left_collider(glm::vec3(22.0f + (1.0f * i), -1.0f, 0.0f));
+        m_game_state.enemies[14 + i].set_right_collider(glm::vec3(22.0f + (1.0f * i), -12.0f + ((i / 4) * 2.0f), 0.0f));
+        m_game_state.enemies[14 + i].set_movement(glm::vec3(0.0f, 0.01f, 0.0f));
+        m_game_state.enemies[14 + i].set_scale(glm::vec3(0.5f));
+        m_game_state.enemies[14 + i].set_ai_state(IDLE);
+        m_game_state.enemies[14 + i].set_ai_type(FALLER);
+    }
+
+    // ENEMY 26 - 35 MORE PIGS
+    for (int i = 0; i < 10; i++) {
+        m_game_state.enemies[26+i] = Entity(
+            pig_texture_id,            // texture id
+            1.0f,                      // speed
+            acceleration,              // acceleration
+            0.0f,                      // jumping power
+            pig_walking_animation,     // animation index sets
+            0.0f,                      // animation time
+            12,                        // animation frame amount
+            0,                         // current animation index
+            12,                        // animation column amount
+            2,                         // animation row amount
+            1.0f,                      // width
+            1.0f,                      // height
+            ENEMY
+        );
+
+        m_game_state.enemies[26 + i].set_position(glm::vec3(23.0f + (1.0f * i), 0.0f, 0.0f));
+        m_game_state.enemies[26 + i].set_left_collider(glm::vec3(22.0f, 0.0f, 0.0f));
+        m_game_state.enemies[26 + i].set_right_collider(glm::vec3(33.0f, 0.0f, 0.0f));
+        if (i % 2 == 0) 
+        {
+            m_game_state.enemies[26 + i].set_movement(glm::vec3(1.0f, 0.0f, 0.0f));
+            m_game_state.enemies[26 + i].face_right();
+        }
+        else
+        {
+            m_game_state.enemies[26 + i].set_movement(glm::vec3(-1.0f, 0.0f, 0.0f));
+            m_game_state.enemies[26 + i].face_left();
+        }
+        m_game_state.enemies[26 + i].set_ai_type(WALKER);
+    }
+
+
     /**
      BGM and SFX
      */
@@ -262,12 +331,11 @@ bool LevelC::update(float delta_time)
     //std::cout << m_game_state.player->get_position().x << " " << m_game_state.player->get_position().y << std::endl;
 
     if (LEVELC_END_FLAG.x < m_game_state.player->get_position().x && glm::distance(LEVELC_END_FLAG, m_game_state.player->get_position()) < 2.0f) {
-        m_game_state.next_scene_id = 0;
+        m_game_state.next_scene_id = 4;
         std::cout << "LEVEL FINISHED" << std::endl;
     }
 
-    //return collide_with_enemy;
-    return false;
+    return collide_with_enemy;
 }
 
 void LevelC::render(ShaderProgram* program)

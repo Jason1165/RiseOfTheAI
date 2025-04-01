@@ -13,6 +13,7 @@
 #include "ShaderProgram.h"
 #include "Entity.h"
 
+// added delta_time as a param but turns out i never really needed to use it
 void Entity::ai_activate(Entity* player, float delta_time)
 {
     switch (m_ai_type)
@@ -20,12 +21,14 @@ void Entity::ai_activate(Entity* player, float delta_time)
     case WALKER:
         ai_walk();
         break;
-
     case GUARD:
         ai_guard(player);
         break;
     case FLYER:
-        ai_flyer(delta_time);
+        ai_flyer();
+        break;
+    case FALLER:
+        ai_faller(player);
         break;
     default:
         break;
@@ -81,7 +84,7 @@ void Entity::ai_guard(Entity* player)
     }
 }
 
-void Entity::ai_flyer(float delta_time) 
+void Entity::ai_flyer() 
 {
     float y_coor = m_left_collider.y;
     if (fabs(y_coor - m_position.y) > 0.7f)
@@ -102,6 +105,34 @@ void Entity::ai_flyer(float delta_time)
 
 }
 
+void Entity::ai_faller(Entity* player)
+{
+    switch (m_ai_state) {
+    case IDLE:
+        if (fabs(m_position.x - player->get_position().x) < 1.0f)
+        {
+            m_ai_state = CHARGE;
+            m_velocity.y = -4.0f * m_speed;
+        }
+        break;
+    case CHARGE:
+        if (glm::distance(m_position, m_right_collider) < 1.0f) 
+        {
+            m_velocity.y = 1.0f * m_speed;
+            m_ai_state = RECHARGE;
+        }
+        break;
+    case RECHARGE:
+        if (glm::distance(m_position, m_left_collider) < 1.0f)
+        {
+            m_velocity.y = 0.0f;
+            m_ai_state = IDLE;
+        }
+        break;
+    default:
+        break;
+    }
+}
 // Default constructor
 // changed m_animation_indices from nullptr to nothing
 Entity::Entity()

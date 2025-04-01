@@ -24,7 +24,9 @@
 #include "Map.h"
 #include "Utility.h"
 #include "Scene.h"
+#include "Menu.h"
 #include "LevelA.h"
+#include "LevelB.h"
 #include "LevelC.h"
 
 // ————— CONSTANTS ————— //
@@ -42,7 +44,7 @@ const int   VIEWPORT_X = 0,
             VIEWPORT_WIDTH = WINDOW_WIDTH,
             VIEWPORT_HEIGHT = WINDOW_HEIGHT;
 
-const char  GAME_WINDOW_NAME[] = "Hello, Maps!";
+const char  GAME_WINDOW_NAME[] = "Rise of the AI!";
 
 const char  V_SHADER_PATH[] = "shaders/vertex_textured.glsl",
             F_SHADER_PATH[] = "shaders/fragment_textured.glsl";
@@ -59,18 +61,22 @@ const GLint LEVEL_OF_DETAIL = 0;
 const GLint TEXTURE_BORDER = 0;
 
 enum AppStatus { RUNNING, TERMINATED };
+enum ScreenStatus {MENU, PAUSE, REGULAR, GAMEWIN, GAMEOVER};
 
 
 // ————— VARIABLES ————— //
 Scene* g_current_scene;
+Menu* g_menu;
 LevelA* g_levelA;
+LevelB* g_levelB;
 LevelC* g_levelC;
 Effects* g_effects = nullptr;
 
-Scene* g_levels[2];
+Scene* g_levels[4];
 
 SDL_Window* g_display_window;
 AppStatus g_app_status = RUNNING;
+ScreenStatus g_screen_status = MENU;
 
 ShaderProgram g_shader_program;
 glm::mat4 g_view_matrix, g_projection_matrix;
@@ -90,6 +96,11 @@ void process_input();
 void update();
 void render();
 void shutdown();
+
+
+// CHEATCODES CAUSE WHY NOT
+bool SPEED_CHEAT = false;
+bool JUMP_CHEAT = false;
 
 
 // ————— GENERAL FUNCTIONS ————— //
@@ -132,12 +143,16 @@ void initialise()
     glClearColor(BG_RED, BG_BLUE, BG_GREEN, BG_OPACITY);
 
     // ————— MAP SET-UP ————— //
+    g_menu = new Menu();
     g_levelA = new LevelA();
+    g_levelB = new LevelB();
     g_levelC = new LevelC();
-    g_levels[0] = g_levelA;
-    g_levels[1] = g_levelC;
+    g_levels[0] = g_menu;
+    g_levels[1] = g_levelA;
+    g_levels[2] = g_levelB;
+    g_levels[3] = g_levelC;
 
-    switch_to_scene(g_levels[1]);
+    switch_to_scene(g_levels[0]);
 
     // -- EFFECTS -- //
     g_effects = new Effects(g_projection_matrix, g_view_matrix);
@@ -172,12 +187,30 @@ void process_input()
 
         case SDL_KEYDOWN:
             switch (event.key.keysym.sym) {
+            case SDLK_RETURN:
+                if (g_screen_status == MENU) 
+                {
+                    g_screen_status = REGULAR;
+                    switch_to_scene(g_levels[1]);
+                }
+                break;
+            case SDLK_p:
+                if (g_screen_status == REGULAR) { g_screen_status = PAUSE; }
+                else if(g_screen_status == PAUSE) { g_screen_status = REGULAR;  }
+                break;
             case SDLK_q:
                 // Quit the game with a keystroke
                 g_app_status = TERMINATED;
                 break;
             case SDLK_k:
                 GAME_LIVES += 5;
+                break;
+            case SDLK_s:
+                SPEED_CHEAT = !SPEED_CHEAT;
+                break;
+            case SDLK_j:
+                JUMP_CHEAT = !JUMP_CHEAT;
+                break;
             case SDLK_SPACE:
             case SDLK_UP: { // creating scope 
                 // Jump
@@ -218,11 +251,17 @@ void process_input()
     if (glm::length(g_current_scene->get_state().player->get_movement()) > 1.0f) {
         g_current_scene->get_state().player->normalise_movement();
     }
-
 }
 
 void update()
 {
+
+    // CHEATS
+    if (SPEED_CHEAT) { g_current_scene->get_state().player->let_me_move_faster(2.0f); }
+    g_current_scene->get_state().player->set_jumping_power(3.75f);
+    if (JUMP_CHEAT) { g_current_scene->get_state().player->set_jumping_power(6.0f); }
+
+    // NORMAL CODE
     float ticks = (float)SDL_GetTicks() / MILLISECONDS_IN_SECOND;
     float delta_time = ticks - g_previous_ticks;
     g_previous_ticks = ticks;
@@ -237,7 +276,7 @@ void update()
 
     while (delta_time >= FIXED_TIMESTEP)
     {
-        if (g_current_scene->update(FIXED_TIMESTEP)) {
+        if (g_screen_status == REGULAR && g_current_scene->update(FIXED_TIMESTEP)) {
             GAME_LIVES--;
             std::cout << GAME_LIVES << std::endl;
             g_effects->start(FADEIN, 0.2f);

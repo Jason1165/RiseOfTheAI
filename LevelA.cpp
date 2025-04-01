@@ -112,7 +112,7 @@ void LevelA::initialise()
     m_game_state.enemies[0].set_position(glm::vec3(26.0f, -10.0f, 0.0f));
     m_game_state.enemies[0].set_left_collider(glm::vec3(24.0f, -10.0f, 0.0f));
     m_game_state.enemies[0].set_right_collider(glm::vec3(29.0f, -10.0f, 0.0f));
-    m_game_state.enemies[0].set_movement(glm::vec3(-1.0f, 0.0f, 0.0f));
+    m_game_state.enemies[0].set_movement(glm::vec3(1.0f, 0.0f, 0.0f));
     m_game_state.enemies[0].set_ai_type(WALKER);
 
 
@@ -165,7 +165,7 @@ void LevelA::initialise()
     m_game_state.enemies[2].set_position(glm::vec3(16.0f, -9.0f, 0.0f));
     m_game_state.enemies[2].set_left_collider(glm::vec3(12.0f, -9.0f, 0.0f));
     m_game_state.enemies[2].set_right_collider(glm::vec3(21.0f, -9.0f, 0.0f));
-    m_game_state.enemies[2].set_movement(glm::vec3(-1.0f, 0.0f, 0.0f));
+    m_game_state.enemies[2].set_movement(glm::vec3(1.0f, 0.0f, 0.0f));
     m_game_state.enemies[2].set_ai_type(WALKER);
 
     /**
@@ -195,7 +195,7 @@ bool LevelA::update(float delta_time)
     //std::cout << m_game_state.player->get_position().x << " " << m_game_state.player->get_position().y << std::endl;
 
     if (LEVELA_END_FLAG.x < m_game_state.player->get_position().x && glm::distance(LEVELA_END_FLAG, m_game_state.player->get_position()) < 2.0f) {
-        m_game_state.next_scene_id = 1;
+        m_game_state.next_scene_id = 2;
         std::cout << "LEVEL FINISHED" << std::endl;
     }
 

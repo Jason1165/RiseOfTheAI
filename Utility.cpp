@@ -10,6 +10,9 @@
 #include <SDL_image.h>
 #include "stb_image.h"
 
+constexpr int FONTBANK_ROWS = 8;
+constexpr int FONTBANK_COLS = 16;
+
 GLuint Utility::load_texture(const char* filepath) {
     int width, height, number_of_components;
     unsigned char* image = stbi_load(filepath, &width, &height, &number_of_components, STBI_rgb_alpha);
@@ -38,8 +41,8 @@ GLuint Utility::load_texture(const char* filepath) {
 
 void Utility::draw_text(ShaderProgram* program, GLuint font_texture_id, std::string text, float screen_size, float spacing, glm::vec3 position)
 {
-    float width = 1.0f / FONTBANK_SIZE;
-    float height = 1.0f / FONTBANK_SIZE;
+    float width = 1.0f / FONTBANK_COLS;
+    float height = 1.0f / FONTBANK_ROWS;
 
 
     std::vector<float> vertices;
@@ -52,8 +55,8 @@ void Utility::draw_text(ShaderProgram* program, GLuint font_texture_id, std::str
         float offset = (screen_size + spacing) * i;
 
         // 2. Using the spritesheet index, we can calculate our U- and V-coordinates
-        float u_coordinate = (float)(spritesheet_index % FONTBANK_SIZE) / FONTBANK_SIZE;
-        float v_coordinate = (float)(spritesheet_index / FONTBANK_SIZE) / FONTBANK_SIZE;
+        float u_coordinate = (float)(spritesheet_index % FONTBANK_COLS) / FONTBANK_COLS;
+        float v_coordinate = (float)(spritesheet_index / FONTBANK_COLS) / FONTBANK_ROWS;
 
         // 3. Inset the current pair in both vectors
         vertices.insert(vertices.end(), {
