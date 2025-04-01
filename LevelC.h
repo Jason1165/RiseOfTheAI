@@ -1,11 +1,11 @@
 #include "Scene.h"
 
-class LevelA : public Scene
+class LevelC : public Scene
 {
 public:
-    int LEVELA_ENEMY_COUNT = 3;
+    int LEVELC_ENEMY_COUNT = 14;
 
-    ~LevelA();
+    ~LevelC();
 
     void initialise() override;
     bool update(float delta_time) override;

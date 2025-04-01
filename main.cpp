@@ -19,11 +19,13 @@
 #include "cmath"
 #include <ctime>
 #include <vector>
+#include "Effects.h"
 #include "Entity.h"
 #include "Map.h"
 #include "Utility.h"
 #include "Scene.h"
 #include "LevelA.h"
+#include "LevelC.h"
 
 // ————— CONSTANTS ————— //
 const float MULTI = 1.5f;
@@ -62,8 +64,10 @@ enum AppStatus { RUNNING, TERMINATED };
 // ————— VARIABLES ————— //
 Scene* g_current_scene;
 LevelA* g_levelA;
+LevelC* g_levelC;
+Effects* g_effects = nullptr;
 
-Scene* g_levels[1];
+Scene* g_levels[2];
 
 SDL_Window* g_display_window;
 AppStatus g_app_status = RUNNING;
@@ -129,11 +133,14 @@ void initialise()
 
     // ————— MAP SET-UP ————— //
     g_levelA = new LevelA();
+    g_levelC = new LevelC();
     g_levels[0] = g_levelA;
+    g_levels[1] = g_levelC;
 
-    switch_to_scene(g_levels[0]);
+    switch_to_scene(g_levels[1]);
 
     // -- EFFECTS -- //
+    g_effects = new Effects(g_projection_matrix, g_view_matrix);
 
 
     // MUSIC FIX LATER
@@ -169,6 +176,8 @@ void process_input()
                 // Quit the game with a keystroke
                 g_app_status = TERMINATED;
                 break;
+            case SDLK_k:
+                GAME_LIVES += 5;
             case SDLK_SPACE:
             case SDLK_UP: { // creating scope 
                 // Jump
@@ -228,8 +237,12 @@ void update()
 
     while (delta_time >= FIXED_TIMESTEP)
     {
-        g_current_scene->update(FIXED_TIMESTEP);
-        //g_effects->update(FIXED_TIMESTEP);
+        if (g_current_scene->update(FIXED_TIMESTEP)) {
+            GAME_LIVES--;
+            std::cout << GAME_LIVES << std::endl;
+            g_effects->start(FADEIN, 0.2f);
+        }
+        g_effects->update(FIXED_TIMESTEP);
 
         //if (g_is_colliding_bottom == false && g_current_scene->get_state().player->get_collided_bottom()) g_effects->start(SHAKE, 1.0f);
 
@@ -265,7 +278,7 @@ void render()
     // ————— RENDERING THE SCENE (i.e. map, character, enemies...) ————— //
     g_current_scene->render(&g_shader_program);
 
-    //g_effects->render();
+    g_effects->render();
 
     SDL_GL_SwapWindow(g_display_window);
 }
@@ -275,7 +288,8 @@ void shutdown()
     SDL_Quit();
 
     delete g_levelA;
-    //delete g_effects;
+    delete g_levelC;
+    delete g_effects;
 }
 
 // ————— GAME LOOP ————— //

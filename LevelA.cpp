@@ -7,6 +7,7 @@
 constexpr char PLAYER_FILEPATH[] = "assets/char_run.png";
 constexpr char PIG_FILEPATH[] = "assets/angry_pig.png";
 constexpr char CHICKEN_FILEPATH[] = "assets/chicken.png";
+glm::vec3 LEVELA_END_FLAG = glm::vec3(32.0f, -1.0f, 0.0f);
 
 
 unsigned int LEVELA_DATA[] =
@@ -64,7 +65,7 @@ void LevelA::initialise()
         player_texture_id,         // texture id
         2.0f,                      // speed
         acceleration,              // acceleration
-        3.75f,                      // jumping power
+        3.75f,                     // jumping power
         player_walking_animation,  // animation index sets
         0.0f,                      // animation time
         18,                        // animation frame amount
@@ -76,8 +77,7 @@ void LevelA::initialise()
         PLAYER
     );
 
-    m_game_state.player->set_position(glm::vec3(7.0f, -15.0f, 0.0f));
-    m_game_state.player->set_scale(glm::vec3(1.0f, 0.75f, 0.0f));
+    m_game_state.player->set_position(glm::vec3(6.5f, 0.0f, 0.0f));
 
     // -- ENEMIES -- //
     GLuint pig_texture_id = Utility::load_texture(PIG_FILEPATH);
@@ -124,11 +124,11 @@ void LevelA::initialise()
     };
 
     m_game_state.enemies[1] = Entity(
-        chicken_texture_id,          // texture id
+        chicken_texture_id,        // texture id
         1.0f,                      // speed
         acceleration,              // acceleration
         0.0f,                      // jumping power
-        chicken_walking_animation,   // animation index sets
+        chicken_walking_animation, // animation index sets
         0.0f,                      // animation time
         14,                        // animation frame amount
         0,                         // current animation index
@@ -168,8 +168,6 @@ void LevelA::initialise()
     m_game_state.enemies[2].set_movement(glm::vec3(-1.0f, 0.0f, 0.0f));
     m_game_state.enemies[2].set_ai_type(WALKER);
 
-
-
     /**
      BGM and SFX
      */
@@ -182,16 +180,26 @@ void LevelA::initialise()
     m_game_state.jump_sfx = Mix_LoadWAV("assets/bounce.wav");
 }
 
-void LevelA::update(float delta_time)
+bool LevelA::update(float delta_time)
 {
     bool collide_with_enemy = m_game_state.player->update(delta_time, m_game_state.player, m_game_state.enemies, LEVELA_ENEMY_COUNT, m_game_state.map);
-    //collide_with_enemy ? std::cout << "TRUE" << std::endl : std::cout << "FALSE" << std::endl;
+    collide_with_enemy = collide_with_enemy || m_game_state.player->get_position().y < -20.0f;
+    if (collide_with_enemy) {
+        initialise();
+    }
 
     for (int i = 0; i < LEVELA_ENEMY_COUNT; i++) {
         m_game_state.enemies[i].update(delta_time, m_game_state.player, nullptr, 0, m_game_state.map);
     }
 
-    //if (m_game_state.player->get_position().y < -10.0f) m_game_state.next_scene_id = 0;
+    //std::cout << m_game_state.player->get_position().x << " " << m_game_state.player->get_position().y << std::endl;
+
+    if (LEVELA_END_FLAG.x < m_game_state.player->get_position().x && glm::distance(LEVELA_END_FLAG, m_game_state.player->get_position()) < 2.0f) {
+        m_game_state.next_scene_id = 1;
+        std::cout << "LEVEL FINISHED" << std::endl;
+    }
+
+    return collide_with_enemy;
 }
 
 void LevelA::render(ShaderProgram* program)

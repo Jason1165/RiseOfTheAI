@@ -32,6 +32,7 @@ struct GameState
 
     // ————— POINTERS TO OTHER SCENES ————— //
     int next_scene_id;
+    int lives;
 };
 
 class Scene
@@ -45,7 +46,7 @@ public:
 
     // ————— METHODS ————— //
     virtual void initialise() = 0;
-    virtual void update(float delta_time) = 0;
+    virtual bool update(float delta_time) = 0;
     virtual void render(ShaderProgram* program) = 0;
 
     // ————— GETTERS ————— //

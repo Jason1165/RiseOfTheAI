@@ -11,11 +11,12 @@ enum EntityType { PLATFORM, PLAYER, ENEMY };
                 IDLE:   Standing there
                 CHARGE: Charges in direction of where it first senses Player
                         with no regard with death
+    FLYER:      movement in a sinusoidal pattern between two points
             
 */
-enum AIType { WALKER, GUARD };
+enum AIType { WALKER, GUARD, FLYER };
 enum AIState { IDLE, CHARGE, DEATH };
-enum JumpState { NONE, SINGLE, DOUBLE };
+enum JumpState { ZERO, SINGLE, DOUBLE };
 
 
 enum AnimationDirection { LEFT, RIGHT, UP, DOWN };
@@ -44,7 +45,7 @@ private:
                 m_jumping_power;
 
     bool m_is_jumping = false;
-    JumpState m_jump_state = NONE;
+    JumpState m_jump_state = ZERO;
 
     // ————— TEXTURES ————— //
     GLuint    m_texture_id;
@@ -96,9 +97,10 @@ public:
     bool update(float delta_time, Entity* player, Entity* collidable_entities, int collidable_entity_count, Map* map);
     void render(ShaderProgram* program);
 
-    void ai_activate(Entity* player);
+    void ai_activate(Entity* player, float delta_time);
     void ai_walk();
     void ai_guard(Entity* player);
+    void ai_flyer(float delta_time);
 
     void normalise_movement() { m_movement = glm::normalize(m_movement); }
 

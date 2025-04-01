@@ -13,7 +13,7 @@
 #include "ShaderProgram.h"
 #include "Entity.h"
 
-void Entity::ai_activate(Entity* player)
+void Entity::ai_activate(Entity* player, float delta_time)
 {
     switch (m_ai_type)
     {
@@ -24,7 +24,9 @@ void Entity::ai_activate(Entity* player)
     case GUARD:
         ai_guard(player);
         break;
-
+    case FLYER:
+        ai_flyer(delta_time);
+        break;
     default:
         break;
     }
@@ -32,11 +34,13 @@ void Entity::ai_activate(Entity* player)
 
 void Entity::ai_walk()
 {
-    if (glm::distance(m_position, m_left_collider) < 0.5f) {
+    if (glm::distance(m_position, m_left_collider) < 0.5f) 
+    {
         m_movement.x *= -1.0f;
         this->face_right();
     }
-    else if (glm::distance(m_position, m_right_collider) < 0.5f) {
+    else if (glm::distance(m_position, m_right_collider) < 0.5f) 
+    {
         m_movement.x *= -1.0f;
         this->face_left();
     }
@@ -46,9 +50,11 @@ void Entity::ai_guard(Entity* player)
 {
     switch (m_ai_state) {
     case IDLE:
-        if (glm::distance(m_position, player->get_position()) < 5.0f && fabs(m_position.y - player->get_position().y) < 0.5f) {
+        if (glm::distance(m_position, player->get_position()) < 5.0f && fabs(m_position.y - player->get_position().y) < 0.5f) 
+        {
             m_ai_state = CHARGE;
-            if (player->get_position().x < m_position.x) {
+            if (player->get_position().x < m_position.x) 
+            {
                 m_movement = glm::vec3(-0.1f, 0.0f, 0.0f);
                 m_acceleration.y = -100.0f; // just to make sure they fall to their death ...
             }
@@ -57,7 +63,8 @@ void Entity::ai_guard(Entity* player)
 
     case CHARGE:
         m_movement.x += -0.01f;
-        if (glm::distance(m_position, player->get_position()) > 15.0f) {
+        if (glm::distance(m_position, player->get_position()) > 15.0f) 
+        {
             m_ai_state = DEATH;
         }
         break;
@@ -72,6 +79,27 @@ void Entity::ai_guard(Entity* player)
     default:
         break;
     }
+}
+
+void Entity::ai_flyer(float delta_time) 
+{
+    float y_coor = m_left_collider.y;
+    if (fabs(y_coor - m_position.y) > 0.7f)
+    {
+        m_velocity.y *= -1.0f;
+    }
+
+    if (glm::distance(m_position, m_left_collider) < 1.0f) 
+    {
+        m_movement.x *= -1.0f;
+        this->face_right();
+    }
+    else if (glm::distance(m_position, m_right_collider) < 1.0f) 
+    {
+        m_movement.x *= -1.0f;
+        this->face_left();
+    }
+
 }
 
 // Default constructor
@@ -332,7 +360,7 @@ bool Entity::update(float delta_time, Entity* player, Entity* collidable_entitie
     m_collided_left = false;
     m_collided_right = false;
 
-    if (m_entity_type == ENEMY) ai_activate(player);
+    if (m_entity_type == ENEMY) ai_activate(player, delta_time);
 
     if (!m_animation_indices.empty())
     {
@@ -361,7 +389,7 @@ bool Entity::update(float delta_time, Entity* player, Entity* collidable_entitie
     if (m_is_jumping)
     {
         if (m_jump_state == DOUBLE) {
-            m_jump_state = NONE;
+            m_jump_state = ZERO;
         }
         m_is_jumping = false;
         m_velocity.y += m_jumping_power;
@@ -378,6 +406,7 @@ bool Entity::update(float delta_time, Entity* player, Entity* collidable_entitie
 
     m_model_matrix = glm::mat4(1.0f);
     m_model_matrix = glm::translate(m_model_matrix, m_position);
+    m_model_matrix = glm::scale(m_model_matrix, m_scale);
     return collision_result;
 }
 
