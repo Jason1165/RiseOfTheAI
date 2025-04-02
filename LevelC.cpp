@@ -89,7 +89,7 @@ void LevelC::initialise()
         PLAYER
     );
 
-    m_game_state.player->set_position(glm::vec3(7.0f, -24.0f, 0.0f));
+    m_game_state.player->set_position(glm::vec3(7.0f, -21.0f, 0.0f));
     //m_game_state.player->set_position(glm::vec3(39.0f, -18.0f, 0.0f));
 
     // -- ENEMIES -- //
@@ -108,7 +108,8 @@ void LevelC::initialise()
         {12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 } // RIGHT
     };
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) 
+    {
         m_game_state.enemies[i] = Entity(
             chicken_texture_id,        // texture id
             1.0f,                      // speed
@@ -243,7 +244,8 @@ void LevelC::initialise()
         {0, 1, 2, 3, 4, 5, 6, 7}
     };
 
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < 12; i++) 
+    {
         m_game_state.enemies[14+i] = Entity(
             bee_texture_id,            // texture id
             1.0f,                      // speed
@@ -270,7 +272,8 @@ void LevelC::initialise()
     }
 
     // ENEMY 26 - 35 MORE PIGS
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) 
+    {
         m_game_state.enemies[26+i] = Entity(
             pig_texture_id,            // texture id
             1.0f,                      // speed
@@ -320,19 +323,18 @@ bool LevelC::update(float delta_time)
 {
     bool collide_with_enemy = m_game_state.player->update(delta_time, m_game_state.player, m_game_state.enemies, LEVELC_ENEMY_COUNT, m_game_state.map);
     collide_with_enemy = collide_with_enemy || m_game_state.player->get_position().y < -30.0f;
-    if (collide_with_enemy) {
-        initialise();
-    }
+    if (collide_with_enemy) { initialise(); }
 
-    for (int i = 0; i < LEVELC_ENEMY_COUNT; i++) {
+    for (int i = 0; i < LEVELC_ENEMY_COUNT; i++) 
+    {
         m_game_state.enemies[i].update(delta_time, m_game_state.player, nullptr, 0, m_game_state.map);
     }
 
     //std::cout << m_game_state.player->get_position().x << " " << m_game_state.player->get_position().y << std::endl;
 
-    if (LEVELC_END_FLAG.x < m_game_state.player->get_position().x && glm::distance(LEVELC_END_FLAG, m_game_state.player->get_position()) < 2.0f) {
+    if (LEVELC_END_FLAG.x < m_game_state.player->get_position().x && glm::distance(LEVELC_END_FLAG, m_game_state.player->get_position()) < 2.0f) 
+    {
         m_game_state.next_scene_id = 4;
-        std::cout << "LEVEL FINISHED" << std::endl;
     }
 
     return collide_with_enemy;
@@ -342,7 +344,8 @@ void LevelC::render(ShaderProgram* program)
 {
     m_game_state.map->render(program);
     m_game_state.player->render(program);
-    for (int i = 0; i < LEVELC_ENEMY_COUNT; i++) {
+    for (int i = 0; i < LEVELC_ENEMY_COUNT; i++) 
+    {
         m_game_state.enemies[i].render(program);
     }
 }

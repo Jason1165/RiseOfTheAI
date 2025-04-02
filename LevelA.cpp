@@ -1,3 +1,4 @@
+
 #include "LevelA.h"
 #include "Utility.h"
 
@@ -184,19 +185,18 @@ bool LevelA::update(float delta_time)
 {
     bool collide_with_enemy = m_game_state.player->update(delta_time, m_game_state.player, m_game_state.enemies, LEVELA_ENEMY_COUNT, m_game_state.map);
     collide_with_enemy = collide_with_enemy || m_game_state.player->get_position().y < -20.0f;
-    if (collide_with_enemy) {
-        initialise();
-    }
+    if (collide_with_enemy) { initialise(); }
 
-    for (int i = 0; i < LEVELA_ENEMY_COUNT; i++) {
+    for (int i = 0; i < LEVELA_ENEMY_COUNT; i++) 
+    {
         m_game_state.enemies[i].update(delta_time, m_game_state.player, nullptr, 0, m_game_state.map);
     }
 
     //std::cout << m_game_state.player->get_position().x << " " << m_game_state.player->get_position().y << std::endl;
 
-    if (LEVELA_END_FLAG.x < m_game_state.player->get_position().x && glm::distance(LEVELA_END_FLAG, m_game_state.player->get_position()) < 2.0f) {
+    if (LEVELA_END_FLAG.x < m_game_state.player->get_position().x && glm::distance(LEVELA_END_FLAG, m_game_state.player->get_position()) < 2.0f) 
+    {
         m_game_state.next_scene_id = 2;
-        std::cout << "LEVEL FINISHED" << std::endl;
     }
 
     return collide_with_enemy;
@@ -206,7 +206,8 @@ void LevelA::render(ShaderProgram* program)
 {
     m_game_state.map->render(program);
     m_game_state.player->render(program);
-    for (int i = 0; i < LEVELA_ENEMY_COUNT; i++) {
+    for (int i = 0; i < LEVELA_ENEMY_COUNT; i++) 
+    {
         m_game_state.enemies[i].render(program);
     }
 }

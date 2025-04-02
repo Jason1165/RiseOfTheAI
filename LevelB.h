@@ -1,9 +1,10 @@
+#pragma once
 #include "Scene.h"
 
 class LevelB : public Scene
 {
 public:
-    int LEVELB_ENEMY_COUNT = 1;
+    int LEVELB_ENEMY_COUNT = 12;
 
     ~LevelB();
 

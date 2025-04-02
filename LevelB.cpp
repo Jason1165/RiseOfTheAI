@@ -99,7 +99,7 @@ void LevelB::initialise()
         PLAYER
     );
 
-    m_game_state.player->set_position(glm::vec3(4.0f, -35.0f, 0.0f));
+    m_game_state.player->set_position(glm::vec3(4.5f, -6.0f, 0.0f));
 
     // -- ENEMIES -- //
     GLuint pig_texture_id = Utility::load_texture(PIG_FILEPATH);
@@ -109,13 +109,6 @@ void LevelB::initialise()
 
 
     m_game_state.enemies = new Entity[LEVELB_ENEMY_COUNT];
-
-    // ENEMY CHICKENS
-    std::vector<std::vector<int>> chicken_walking_animation =
-    {
-        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}, // LEFT
-        {12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 } // RIGHT
-    };
 
     // ENEMY 0 PIG
     std::vector<std::vector<int>> pig_walking_animation =
@@ -146,69 +139,118 @@ void LevelB::initialise()
     m_game_state.enemies[0].set_movement(glm::vec3(1.0f, 0.0f, 0.0f));
     m_game_state.enemies[0].set_ai_type(WALKER);
 
-    // ENEMY 13 BAT
+    // ENEMY 1 & 2 BAT
     std::vector<std::vector<int>> bat_walking_animation =
     {
         {0, 1, 2, 3, 4, 5, 6}, // LEFT
         {7, 8, 9, 10, 11, 12, 13} // RIGHT
     };
 
-    //m_game_state.enemies[13] = Entity(
-    //    bat_texture_id,            // texture id
-    //    1.5f,                      // speed
-    //    glm::vec3(0.0f),           // acceleration
-    //    0.0f,                      // jumping power
-    //    bat_walking_animation,     // animation index sets
-    //    0.0f,                      // animation time
-    //    7,                         // animation frame amount
-    //    0,                         // current animation index
-    //    7,                         // animation column amount
-    //    2,                         // animation row amount
-    //    0.25f,                      // width
-    //    0.25f,                      // height
-    //    ENEMY
-    //);
+    m_game_state.enemies[1] = Entity(
+        bat_texture_id,            // texture id
+        1.0f,                      // speed
+        glm::vec3(0.0f),           // acceleration
+        0.0f,                      // jumping power
+        bat_walking_animation,     // animation index sets
+        0.0f,                      // animation time
+        7,                         // animation frame amount
+        0,                         // current animation index
+        7,                         // animation column amount
+        2,                         // animation row amount
+        0.25f,                      // width
+        0.25f,                      // height
+        ENEMY
+    );
 
-    //m_game_state.enemies[13].set_position(glm::vec3(30.0f, -17.5f, 0.0f));
-    //m_game_state.enemies[13].set_left_collider(glm::vec3(8.0f, -17.5f, 0.0f));
-    //m_game_state.enemies[13].set_right_collider(glm::vec3(35.0f, -17.5f, 0.0f));
-    //m_game_state.enemies[13].set_movement(glm::vec3(2.0f, 0.0f, 0.0f));
-    //m_game_state.enemies[13].set_velocity(glm::vec3(0.0f, 1.0f, 0.0f));
-    //m_game_state.enemies[13].set_scale(glm::vec3(0.5f));
-    //m_game_state.enemies[13].set_ai_type(FLYER);
+    m_game_state.enemies[1].set_position(glm::vec3(27.0f, -31.5f, 0.0f));
+    m_game_state.enemies[1].set_left_collider(glm::vec3(9.0f, -31.5f, 0.0f));
+    m_game_state.enemies[1].set_right_collider(glm::vec3(33.0f, -31.5f, 0.0f));
+    m_game_state.enemies[1].set_movement(glm::vec3(2.0f, 0.0f, 0.0f));
+    m_game_state.enemies[1].set_velocity(glm::vec3(0.0f, 1.0f, 0.0f));
+    m_game_state.enemies[1].set_scale(glm::vec3(0.5f));
+    m_game_state.enemies[1].set_ai_type(FLYER);
+
+    m_game_state.enemies[2] = Entity(
+        bat_texture_id,            // texture id
+        1.0f,                      // speed
+        glm::vec3(0.0f),           // acceleration
+        0.0f,                      // jumping power
+        bat_walking_animation,     // animation index sets
+        0.0f,                      // animation time
+        7,                         // animation frame amount
+        0,                         // current animation index
+        7,                         // animation column amount
+        2,                         // animation row amount
+        0.25f,                     // width
+        0.25f,                     // height
+        ENEMY
+    );
+
+    m_game_state.enemies[2].set_position(glm::vec3(27.0f, -34.5f, 0.0f));
+    m_game_state.enemies[2].set_left_collider(glm::vec3(7.0f, -34.5f, 0.0f));
+    m_game_state.enemies[2].set_right_collider(glm::vec3(32.0f, -3.5f, 0.0f));
+    m_game_state.enemies[2].set_movement(glm::vec3(2.0f, 0.0f, 0.0f));
+    m_game_state.enemies[2].set_velocity(glm::vec3(0.0f, 1.0f, 0.0f));
+    m_game_state.enemies[2].set_scale(glm::vec3(0.5f));
+    m_game_state.enemies[2].set_ai_type(FLYER);
 
 
-    // ENEMY 14 - 25 BEEEEEEEEEEEES
+    // ENEMY 3 - 10 BEEEEEEEEEEEES
     std::vector<std::vector<int>> bee_walking_animation = {
         {0, 1, 2, 3, 4, 5, 6, 7},
         {0, 1, 2, 3, 4, 5, 6, 7}
     };
 
-    //for (int i = 0; i < 12; i++) {
-    //    m_game_state.enemies[14 + i] = Entity(
-    //        bee_texture_id,            // texture id
-    //        1.5f,                      // speed
-    //        glm::vec3(0.0f),           // acceleration
-    //        0.0f,                      // jumping power
-    //        bee_walking_animation,     // animation index sets
-    //        0.0f,                      // animation time
-    //        8,                         // animation frame amount
-    //        0,                         // current animation index
-    //        8,                         // animation column amount
-    //        1,                         // animation row amount
-    //        0.5f,                      // width
-    //        0.5f,                      // height
-    //        ENEMY
-    //    );
+    for (int i = 0; i < 8; i++) 
+    {
+        m_game_state.enemies[3 + i] = Entity(
+            bee_texture_id,            // texture id
+            0.5f,                      // speed
+            glm::vec3(0.0f),           // acceleration
+            0.0f,                      // jumping power
+            bee_walking_animation,     // animation index sets
+            0.0f,                      // animation time
+            8,                         // animation frame amount
+            0,                         // current animation index
+            8,                         // animation column amount
+            1,                         // animation row amount
+            0.5f,                      // width
+            0.5f,                      // height
+            ENEMY
+        );
 
-    //    m_game_state.enemies[14 + i].set_position(glm::vec3(22.0f + (1.0f * i), -2.0f, 0.0f));
-    //    m_game_state.enemies[14 + i].set_left_collider(glm::vec3(22.0f + (1.0f * i), -1.0f, 0.0f));
-    //    m_game_state.enemies[14 + i].set_right_collider(glm::vec3(22.0f + (1.0f * i), -12.0f + ((i / 4) * 2.0f), 0.0f));
-    //    m_game_state.enemies[14 + i].set_movement(glm::vec3(0.0f, 0.01f, 0.0f));
-    //    m_game_state.enemies[14 + i].set_scale(glm::vec3(0.5f));
-    //    m_game_state.enemies[14 + i].set_ai_state(IDLE);
-    //    m_game_state.enemies[14 + i].set_ai_type(FALLER);
-    //}
+        m_game_state.enemies[3 + i].set_position(glm::vec3(10.0f + (1.0f * i) + (4.0f * (i/4)), -26.0f, 0.0f));
+        m_game_state.enemies[3 + i].set_left_collider(glm::vec3(10.0f + (1.0f * i) + (4.0f * (i / 4)), -25.0f, 0.0f));
+        m_game_state.enemies[3 + i].set_right_collider(glm::vec3(10.0f + (1.0f * i) + (4.0f * (i / 4)), -30.0f, 0.0f));
+        m_game_state.enemies[3 + i].set_movement(glm::vec3(0.0f, 0.01f, 0.0f));
+        m_game_state.enemies[3 + i].set_scale(glm::vec3(0.5f));
+        m_game_state.enemies[3 + i].set_ai_state(IDLE);
+        m_game_state.enemies[3 + i].set_ai_type(FALLER);
+    }
+
+    m_game_state.enemies[11] = Entity(
+        bee_texture_id,            // texture id
+        2.5f,                      // speed
+        glm::vec3(0.0f),           // acceleration
+        0.0f,                      // jumping power
+        bee_walking_animation,     // animation index sets
+        0.0f,                      // animation time
+        8,                         // animation frame amount
+        0,                         // current animation index
+        8,                         // animation column amount
+        1,                         // animation row amount
+        0.5f,                      // width
+        0.5f,                      // height
+        ENEMY
+    );
+
+    m_game_state.enemies[11].set_position(glm::vec3(25.0f, -10.0f, 0.0f));
+    m_game_state.enemies[11].set_left_collider(glm::vec3(25.0f, -9.0f, 0.0f));
+    m_game_state.enemies[11].set_right_collider(glm::vec3(25.0f, -30.0f, 0.0f));
+    m_game_state.enemies[11].set_movement(glm::vec3(0.0f, 0.01f, 0.0f));
+    m_game_state.enemies[11].set_scale(glm::vec3(0.5f));
+    m_game_state.enemies[11].set_ai_state(IDLE);
+    m_game_state.enemies[11].set_ai_type(FALLER);
 
 
     /**
@@ -227,17 +269,16 @@ bool LevelB::update(float delta_time)
 {
     bool collide_with_enemy = m_game_state.player->update(delta_time, m_game_state.player, m_game_state.enemies, LEVELB_ENEMY_COUNT, m_game_state.map);
     collide_with_enemy = collide_with_enemy || m_game_state.player->get_position().y < -40.0f;
-    if (collide_with_enemy) {
-        initialise();
-    }
+    if (collide_with_enemy) { initialise(); }
 
-    for (int i = 0; i < LEVELB_ENEMY_COUNT; i++) {
+    for (int i = 0; i < LEVELB_ENEMY_COUNT; i++) 
+    {
         m_game_state.enemies[i].update(delta_time, m_game_state.player, nullptr, 0, m_game_state.map);
     }
 
-    if (LEVELB_END_FLAG.x < m_game_state.player->get_position().x && glm::distance(LEVELB_END_FLAG, m_game_state.player->get_position()) < 1.0f) {
+    if (LEVELB_END_FLAG.x < m_game_state.player->get_position().x && glm::distance(LEVELB_END_FLAG, m_game_state.player->get_position()) < 1.0f) 
+    {
         m_game_state.next_scene_id = 3;
-        std::cout << "LEVEL FINISHED" << std::endl;
     }
 
     return collide_with_enemy;
@@ -247,7 +288,8 @@ void LevelB::render(ShaderProgram* program)
 {
     m_game_state.map->render(program);
     m_game_state.player->render(program);
-    for (int i = 0; i < LEVELB_ENEMY_COUNT; i++) {
+    for (int i = 0; i < LEVELB_ENEMY_COUNT; i++) 
+    {
         m_game_state.enemies[i].render(program);
     }
 }

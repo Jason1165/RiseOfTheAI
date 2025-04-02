@@ -1,3 +1,4 @@
+#pragma once
 #include "Scene.h"
 
 class LevelA : public Scene
