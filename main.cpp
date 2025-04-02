@@ -63,6 +63,9 @@ const GLint TEXTURE_BORDER = 0;
 enum AppStatus { RUNNING, TERMINATED };
 enum ScreenStatus {MENU, PAUSE, REGULAR, GAMEWIN, GAMEOVER};
 
+GLuint heart_texture_id;
+GLuint font_texture_id;
+
 
 // ————— VARIABLES ————— //
 Scene* g_current_scene;
@@ -142,6 +145,10 @@ void initialise()
 
     glClearColor(BG_RED, BG_BLUE, BG_GREEN, BG_OPACITY);
 
+    // TEXTURES
+    heart_texture_id = Utility::load_texture("assets/heart.png");
+    font_texture_id = Utility::load_texture("assets/modified_atari_font.png");
+
     // ————— MAP SET-UP ————— //
     g_menu = new Menu();
     g_levelA = new LevelA();
@@ -194,6 +201,15 @@ void process_input()
                     switch_to_scene(g_levels[1]);
                 }
                 break;
+            case SDLK_1:
+                switch_to_scene(g_levels[1]);
+                break;
+            case SDLK_2:
+                switch_to_scene(g_levels[2]);
+                break;
+            case SDLK_3:
+                switch_to_scene(g_levels[3]);
+                break;
             case SDLK_p:
                 if (g_screen_status == REGULAR) { g_screen_status = PAUSE; }
                 else if(g_screen_status == PAUSE) { g_screen_status = REGULAR;  }
@@ -223,7 +239,8 @@ void process_input()
                     g_current_scene->get_state().player->jump();
                     //Mix_PlayChannel(-1, g_state.jump_sfx, 0);
                 }
-                else if (delta_jump > FIXED_JUMPTIME && g_current_scene->get_state().player->get_jump_state() == SINGLE) {
+                else if (delta_jump > FIXED_JUMPTIME && g_current_scene->get_state().player->get_jump_state() == SINGLE) 
+                {
                     g_current_scene->get_state().player->set_jump_state(DOUBLE);
                     g_current_scene->get_state().player->jump();
                 }
@@ -240,15 +257,18 @@ void process_input()
 
     const Uint8* key_state = SDL_GetKeyboardState(NULL);
 
-    if (key_state[SDL_SCANCODE_LEFT]) {
+    if (key_state[SDL_SCANCODE_LEFT]) 
+    {
         g_current_scene->get_state().player->move_left();
     }
-    else if (key_state[SDL_SCANCODE_RIGHT]) {
+    else if (key_state[SDL_SCANCODE_RIGHT]) 
+    {
         g_current_scene->get_state().player->move_right();
     }
 
     // This makes sure that the player can't move faster diagonally
-    if (glm::length(g_current_scene->get_state().player->get_movement()) > 1.0f) {
+    if (glm::length(g_current_scene->get_state().player->get_movement()) > 1.0f) 
+    {
         g_current_scene->get_state().player->normalise_movement();
     }
 }
@@ -276,9 +296,10 @@ void update()
 
     while (delta_time >= FIXED_TIMESTEP)
     {
-        if (g_screen_status == REGULAR && g_current_scene->update(FIXED_TIMESTEP)) {
+        if (g_screen_status == REGULAR && g_current_scene->update(FIXED_TIMESTEP)) 
+        {
             GAME_LIVES--;
-            std::cout << GAME_LIVES << std::endl;
+            //std::cout << GAME_LIVES << std::endl;
             g_effects->start(FADEIN, 0.2f);
         }
         g_effects->update(FIXED_TIMESTEP);
@@ -295,16 +316,9 @@ void update()
     // changing view matrix
     g_view_matrix = glm::mat4(1.0f);
 
-    //if (g_current_scene->get_state().player->get_position().x > LEVEL1_LEFT_EDGE) {
-        g_view_matrix = glm::translate(g_view_matrix, glm::vec3(-g_current_scene->get_state().player->get_position().x, -g_current_scene->get_state().player->get_position().y, 0));
-    //}
-    //else {
-    //    g_view_matrix = glm::translate(g_view_matrix, glm::vec3(-5, 3.75, 0));
-    //}
+    g_view_matrix = glm::translate(g_view_matrix, glm::vec3(-g_current_scene->get_state().player->get_position().x, -g_current_scene->get_state().player->get_position().y, 0));
 
-    //if (g_current_scene == g_levelA && g_current_scene->get_state().player->get_position().y < -10.0f) switch_to_scene(g_levelA);
 
-    //g_view_matrix = glm::translate(g_view_matrix, g_effects->get_view_offset());
 }
 
 
@@ -316,8 +330,17 @@ void render()
 
     // ————— RENDERING THE SCENE (i.e. map, character, enemies...) ————— //
     g_current_scene->render(&g_shader_program);
-
     g_effects->render();
+
+    // -- RENDERING THE LIVES -- //
+    if (g_screen_status == REGULAR) 
+    {
+        int lives_to_display = (GAME_LIVES >= 3) ? 3 : GAME_LIVES;
+        for (int i = 0; i < lives_to_display; i++) 
+        {
+            Utility::static_render(&g_shader_program, heart_texture_id, g_current_scene->get_state().player->get_position(), glm::vec3(4.5f - (0.6f * i), 3.4f, 0.0f), glm::vec3(0.5f));
+        }
+    }
 
     SDL_GL_SwapWindow(g_display_window);
 }
@@ -326,7 +349,9 @@ void shutdown()
 {
     SDL_Quit();
 
+    delete g_menu;
     delete g_levelA;
+    delete g_levelB;
     delete g_levelC;
     delete g_effects;
 }
@@ -341,10 +366,18 @@ int main(int argc, char* argv[])
         process_input();
         update();
         
-        if (g_current_scene->get_state().next_scene_id >= 0) {
-            switch_to_scene(g_levels[g_current_scene->get_state().next_scene_id]);
+        if (g_current_scene->get_state().next_scene_id >= 0) 
+        {
+            int next_scene = g_current_scene->get_state().next_scene_id;
+            if (next_scene < 4) 
+            {
+                switch_to_scene(g_levels[next_scene]);
+            }
+            else 
+            {
+                std::cout << "Game Finished";
+            }
         }
-
         render();
     }
 

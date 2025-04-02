@@ -419,7 +419,8 @@ bool Entity::update(float delta_time, Entity* player, Entity* collidable_entitie
     // JUMP LOGIC
     if (m_is_jumping)
     {
-        if (m_jump_state == DOUBLE) {
+        if (m_jump_state == DOUBLE) 
+        {
             m_jump_state = ZERO;
         }
         m_is_jumping = false;
