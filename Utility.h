@@ -19,4 +19,5 @@ public:
     // ————— METHODS ————— //
     static GLuint load_texture(const char* filepath);
     static void draw_text(ShaderProgram* program, GLuint font_texture_id, std::string text, float screen_size, float spacing, glm::vec3 position);
+    static void static_render(ShaderProgram* program, GLuint texture_id, glm::vec3 position, glm::vec3 offset, glm::vec3 scale);
 };

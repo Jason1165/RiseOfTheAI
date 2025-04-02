@@ -20,6 +20,7 @@ GLuint Utility::load_texture(const char* filepath) {
     if (image == NULL)
     {
         LOG("Unable to load image. Make sure the path is correct.");
+        LOG(filepath);
         assert(false);
     }
 
@@ -92,6 +93,33 @@ void Utility::draw_text(ShaderProgram* program, GLuint font_texture_id, std::str
 
     glBindTexture(GL_TEXTURE_2D, font_texture_id);
     glDrawArrays(GL_TRIANGLES, 0, (int)(text.size() * 6));
+
+    glDisableVertexAttribArray(program->get_position_attribute());
+    glDisableVertexAttribArray(program->get_tex_coordinate_attribute());
+}
+
+// position = position of player
+// offset = offset with regards to player
+// scale is scale
+void Utility::static_render(ShaderProgram* program, GLuint texture_id, glm::vec3 position, glm::vec3 offset, glm::vec3 scale)
+{
+    glm::mat4 model_matrix = glm::mat4(1.0f);
+    glm::vec3 trans = offset + position;
+    model_matrix = glm::translate(model_matrix, trans);
+    model_matrix = glm::scale(model_matrix, scale);
+    program->set_model_matrix(model_matrix);
+
+    float vertices[] = { -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5 };
+    float tex_coords[] = { 0.0,  1.0, 1.0,  1.0, 1.0, 0.0,  0.0,  1.0, 1.0, 0.0,  0.0, 0.0 };
+
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+
+    glVertexAttribPointer(program->get_position_attribute(), 2, GL_FLOAT, false, 0, vertices);
+    glEnableVertexAttribArray(program->get_position_attribute());
+    glVertexAttribPointer(program->get_tex_coordinate_attribute(), 2, GL_FLOAT, false, 0, tex_coords);
+    glEnableVertexAttribArray(program->get_tex_coordinate_attribute());
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glDisableVertexAttribArray(program->get_position_attribute());
     glDisableVertexAttribArray(program->get_tex_coordinate_attribute());
