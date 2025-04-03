@@ -5,8 +5,9 @@
 #define LEVEL_HEIGHT 1
 
 GLuint fontsheet_id;
-constexpr char PLAYER_FILEPATH[] = "assets/char_run.png";
-constexpr char FONTSHEET[] = "assets/modified_atari_font.png";
+constexpr char PLAYER_FILEPATH[] = "assets/sprites/char_run.png";
+constexpr char FONT_FILEPATH[] = "assets/sprites/modified_atari_font.png";
+constexpr char TILE_FILEPATH[] = "assets/sprites/updated_cake.png";
 unsigned int MENU_DATA[] =
 {
     0
@@ -25,8 +26,8 @@ void Menu::initialise()
 {
     m_game_state.next_scene_id = -1;
 
-    GLuint map_texture_id = Utility::load_texture("assets/updated_cake.png");
-    fontsheet_id = Utility::load_texture(FONTSHEET);
+    GLuint map_texture_id = Utility::load_texture(TILE_FILEPATH);
+    fontsheet_id = Utility::load_texture(FONT_FILEPATH);
 
     // -- PLAYER -- //
     std::vector<std::vector<int>> player_walking_animation =

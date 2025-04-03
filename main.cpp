@@ -51,6 +51,9 @@ const char  V_SHADER_PATH[] = "shaders/vertex_textured.glsl",
 
 const float MILLISECONDS_IN_SECOND = 1000.0;
 
+constexpr char FONT_FILEPATH[] = "assets/sprites/modified_atari_font.png";
+constexpr char HEART_FILEPATH[] = "assets/sprites/heart.png";
+
 const char  SPRITESHEET_FILEPATH[] = "assets/george_0.png",
             MAP_TILESET_FILEPATH[] = "assets/cake_sheet.png",
             BGM_FILEPATH[] = "assets/dooblydoo.mp3",
@@ -146,8 +149,8 @@ void initialise()
     glClearColor(BG_RED, BG_BLUE, BG_GREEN, BG_OPACITY);
 
     // TEXTURES
-    heart_texture_id = Utility::load_texture("assets/heart.png");
-    font_texture_id = Utility::load_texture("assets/modified_atari_font.png");
+    heart_texture_id = Utility::load_texture(HEART_FILEPATH);
+    font_texture_id = Utility::load_texture(FONT_FILEPATH);
 
     // ————— MAP SET-UP ————— //
     g_menu = new Menu();
@@ -211,12 +214,18 @@ void process_input()
                 switch_to_scene(g_levels[3]);
                 break;
             case SDLK_p:
+                // only pause if game is running
                 if (g_screen_status == REGULAR) { g_screen_status = PAUSE; }
                 else if(g_screen_status == PAUSE) { g_screen_status = REGULAR;  }
                 break;
             case SDLK_q:
                 // Quit the game with a keystroke
                 g_app_status = TERMINATED;
+                break;
+            case SDLK_r:
+                g_screen_status = MENU;
+                GAME_LIVES = 3;
+                switch_to_scene(g_levels[0]);
                 break;
             case SDLK_k:
                 GAME_LIVES += 5;
@@ -256,14 +265,16 @@ void process_input()
     }
 
     const Uint8* key_state = SDL_GetKeyboardState(NULL);
-
-    if (key_state[SDL_SCANCODE_LEFT]) 
+    if (g_screen_status == REGULAR)
     {
-        g_current_scene->get_state().player->move_left();
-    }
-    else if (key_state[SDL_SCANCODE_RIGHT]) 
-    {
-        g_current_scene->get_state().player->move_right();
+        if (key_state[SDL_SCANCODE_LEFT])
+        {
+            g_current_scene->get_state().player->move_left();
+        }
+        else if (key_state[SDL_SCANCODE_RIGHT])
+        {
+            g_current_scene->get_state().player->move_right();
+        }
     }
 
     // This makes sure that the player can't move faster diagonally
@@ -299,15 +310,16 @@ void update()
         if (g_screen_status == REGULAR && g_current_scene->update(FIXED_TIMESTEP)) 
         {
             GAME_LIVES--;
-            //std::cout << GAME_LIVES << std::endl;
             g_effects->start(FADEIN, 0.2f);
         }
+
+        if (GAME_LIVES <= 0)
+        {
+            g_screen_status = GAMEOVER;
+        }
+
         g_effects->update(FIXED_TIMESTEP);
-
-        //if (g_is_colliding_bottom == false && g_current_scene->get_state().player->get_collided_bottom()) g_effects->start(SHAKE, 1.0f);
-
         g_is_colliding_bottom = g_current_scene->get_state().player->get_collided_bottom();
-
         delta_time -= FIXED_TIMESTEP;
     }
 
@@ -341,6 +353,17 @@ void render()
             Utility::static_render(&g_shader_program, heart_texture_id, g_current_scene->get_state().player->get_position(), glm::vec3(4.5f - (0.6f * i), 3.4f, 0.0f), glm::vec3(0.5f));
         }
     }
+    else if (g_screen_status == GAMEWIN)
+    {
+        glm::vec3 pos = g_current_scene->get_state().player->get_position() + glm::vec3(-0.5f, 1.0f, 0.0f);
+        Utility::draw_text(&g_shader_program, font_texture_id, "YOU WIN", 0.25f, 0.05f, pos);
+    }
+    else if (g_screen_status == GAMEOVER)
+    {
+        glm::vec3 pos = g_current_scene->get_state().player->get_position() + glm::vec3(-0.5f, 1.0f, 0.0f);
+        Utility::draw_text(&g_shader_program, font_texture_id, "YOU LOSE", 0.25f, 0.05f, pos);
+    }
+
 
     SDL_GL_SwapWindow(g_display_window);
 }
@@ -375,7 +398,7 @@ int main(int argc, char* argv[])
             }
             else 
             {
-                std::cout << "Game Finished";
+                g_screen_status = GAMEWIN;
             }
         }
         render();

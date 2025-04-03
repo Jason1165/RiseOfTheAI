@@ -5,9 +5,12 @@
 #define LEVEL_WIDTH 40
 #define LEVEL_HEIGHT 20
 
-constexpr char PLAYER_FILEPATH[] = "assets/char_run.png";
-constexpr char PIG_FILEPATH[] = "assets/angry_pig.png";
-constexpr char CHICKEN_FILEPATH[] = "assets/chicken.png";
+constexpr char TILE_FILEPATH[] = "assets/sprites/updated_cake.png";
+constexpr char PLAYER_FILEPATH[] = "assets/sprites/char_run.png";
+constexpr char PIG_FILEPATH[] = "assets/sprites/angry_pig.png";
+constexpr char CHICKEN_FILEPATH[] = "assets/sprites/chicken.png";
+constexpr char BAT_FILEPATH[] = "assets/sprites/bat.png";
+constexpr char BEE_FILEPATH[] = "assets/sprites/bee.png";
 glm::vec3 LEVELA_END_FLAG = glm::vec3(32.0f, -1.0f, 0.0f);
 
 
@@ -48,7 +51,7 @@ void LevelA::initialise()
 {
     m_game_state.next_scene_id = -1;
 
-    GLuint map_texture_id = Utility::load_texture("assets/updated_cake.png");
+    GLuint map_texture_id = Utility::load_texture(TILE_FILEPATH);
     m_game_state.map = new Map(LEVEL_WIDTH, LEVEL_HEIGHT, LEVELA_DATA, map_texture_id, 1.0f, 8, 7);
 
     // -- PLAYER -- //
@@ -78,7 +81,7 @@ void LevelA::initialise()
         PLAYER
     );
 
-    m_game_state.player->set_position(glm::vec3(6.5f, 0.0f, 0.0f));
+    m_game_state.player->set_position(glm::vec3(6.5f, -12.0f, 0.0f));
 
     // -- ENEMIES -- //
     GLuint pig_texture_id = Utility::load_texture(PIG_FILEPATH);

@@ -45,9 +45,6 @@
     <ClCompile Include="Menu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LevelB.h">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="LevelB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -78,6 +75,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Menu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
