@@ -258,8 +258,8 @@ void LevelC::initialise()
             0,                         // current animation index
             8,                         // animation column amount
             1,                         // animation row amount
-            0.5f,                      // width
-            0.5f,                      // height
+            0.25f,                      // width
+            0.25f,                      // height
             ENEMY
         );
 

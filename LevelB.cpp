@@ -189,7 +189,7 @@ void LevelB::initialise()
 
     m_game_state.enemies[2].set_position(glm::vec3(27.0f, -34.5f, 0.0f));
     m_game_state.enemies[2].set_left_collider(glm::vec3(7.0f, -34.5f, 0.0f));
-    m_game_state.enemies[2].set_right_collider(glm::vec3(32.0f, -3.5f, 0.0f));
+    m_game_state.enemies[2].set_right_collider(glm::vec3(32.0f, -34.5f, 0.0f));
     m_game_state.enemies[2].set_movement(glm::vec3(2.0f, 0.0f, 0.0f));
     m_game_state.enemies[2].set_velocity(glm::vec3(0.0f, 1.0f, 0.0f));
     m_game_state.enemies[2].set_scale(glm::vec3(0.5f));
@@ -215,8 +215,8 @@ void LevelB::initialise()
             0,                         // current animation index
             8,                         // animation column amount
             1,                         // animation row amount
-            0.5f,                      // width
-            0.5f,                      // height
+            0.25f,                      // width
+            0.25f,                      // height
             ENEMY
         );
 
@@ -240,8 +240,8 @@ void LevelB::initialise()
         0,                         // current animation index
         8,                         // animation column amount
         1,                         // animation row amount
-        0.5f,                      // width
-        0.5f,                      // height
+        0.25f,                      // width
+        0.25f,                      // height
         ENEMY
     );
 
