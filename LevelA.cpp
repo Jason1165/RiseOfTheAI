@@ -17,6 +17,9 @@ constexpr char BGM_FILEPATH[] = "assets/audio/Cupids-Revenge.mp3";
 constexpr char JUMP_FILEPATH[] = "assets/audio/187024__lloydevans09__jump2.wav";
 constexpr char DEATH_FILEPATH[] = "assets/audio/157218__adamweeden__video-game-die-or-lose-life.wav";
 constexpr char CHICKEN_SOUND[] = "assets/audio/475733__dogwomble__rubber-chicken-2.wav";
+constexpr char PIG_SOUND[] = "assets/audio/449986__reinsamba__pig_grunt.wav";
+constexpr char BAT_SOUND[] = "assets/audio/468442__breviceps__video-game-squeak.wav";
+constexpr char BEE_SOUND[] = "assets/audio/390733__funwithsound__buzzing-insect-short.wav";
 
 glm::vec3 LEVELA_END_FLAG = glm::vec3(32.0f, -1.0f, 0.0f);
 
@@ -125,6 +128,7 @@ void LevelA::initialise()
     m_game_state.enemies[0].set_right_collider(glm::vec3(29.0f, -10.0f, 0.0f));
     m_game_state.enemies[0].set_movement(glm::vec3(1.0f, 0.0f, 0.0f));
     m_game_state.enemies[0].set_ai_type(WALKER);
+    m_game_state.enemies[0].set_sound(PIG_SOUND);
 
 
     // ENEMY_ONE
@@ -179,6 +183,7 @@ void LevelA::initialise()
     m_game_state.enemies[2].set_right_collider(glm::vec3(21.0f, -9.0f, 0.0f));
     m_game_state.enemies[2].set_movement(glm::vec3(1.0f, 0.0f, 0.0f));
     m_game_state.enemies[2].set_ai_type(WALKER);
+    m_game_state.enemies[2].set_sound(PIG_SOUND);
 
     /**
      BGM and SFX

@@ -106,9 +106,9 @@ public:
     void render(ShaderProgram* program);
 
     void ai_activate(Entity* player, float delta_time);
-    void ai_walk();
+    void ai_walk(Entity* player);
     void ai_guard(Entity* player);
-    void ai_flyer();
+    void ai_flyer(Entity* player);
     void ai_faller(Entity* player);
 
     void normalise_movement() { m_movement = glm::normalize(m_movement); }

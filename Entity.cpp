@@ -19,13 +19,13 @@ void Entity::ai_activate(Entity* player, float delta_time)
     switch (m_ai_type)
     {
     case WALKER:
-        ai_walk();
+        ai_walk(player);
         break;
     case GUARD:
         ai_guard(player);
         break;
     case FLYER:
-        ai_flyer();
+        ai_flyer(player);
         break;
     case FALLER:
         ai_faller(player);
@@ -35,8 +35,13 @@ void Entity::ai_activate(Entity* player, float delta_time)
     }
 }
 
-void Entity::ai_walk()
+void Entity::ai_walk(Entity* player)
 {
+    if (glm::distance(m_position, player->get_position()) < 2.0f) 
+    {
+        Mix_PlayChannel(-1, m_sound_sfx, 0);
+    }
+
     if (glm::distance(m_position, m_left_collider) < 0.5f) 
     {
         m_movement.x *= -1.0f;
@@ -85,8 +90,13 @@ void Entity::ai_guard(Entity* player)
     }
 }
 
-void Entity::ai_flyer() 
+void Entity::ai_flyer(Entity* player) 
 {
+    if (glm::distance(m_position, player->get_position()) < 1.5f)
+    {
+        Mix_PlayChannel(-1, m_sound_sfx, 0);
+    }
+
     float y_coor = m_left_collider.y;
     if (fabs(y_coor - m_position.y) > 0.7f)
     {
@@ -113,6 +123,7 @@ void Entity::ai_faller(Entity* player)
         {
             m_ai_state = CHARGE;
             m_velocity.y = -4.0f * m_speed;
+            Mix_PlayChannel(-1, m_sound_sfx, 0);
         }
         break;
     case CHARGE:
