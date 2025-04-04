@@ -168,14 +168,8 @@ void initialise()
     g_effects = new Effects(g_projection_matrix, g_view_matrix);
 
 
-    // MUSIC FIX LATER
-    //Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
-
-    //g_state.bgm = Mix_LoadMUS(BGM_FILEPATH);
-    //Mix_PlayMusic(g_state.bgm, -1);
-    //Mix_VolumeMusic(MIX_MAX_VOLUME / 4.0f);
-
-    //g_state.jump_sfx = Mix_LoadWAV(JUMP_SFX_FILEPATH);
+    // MUSIC 
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
 
     // ————— BLENDING ————— //
     glEnable(GL_BLEND);
@@ -242,16 +236,17 @@ void process_input()
                 float ticks_jump = (float)SDL_GetTicks() / MILLISECONDS_IN_SECOND;
                 float delta_jump = ticks_jump - g_last_jump;
                 g_last_jump = ticks_jump;
-                if (delta_jump > FIXED_JUMPTIME && g_current_scene->get_state().player->get_collided_bottom())
+                if (g_screen_status != PAUSE && delta_jump > FIXED_JUMPTIME && g_current_scene->get_state().player->get_collided_bottom())
                 {
                     g_current_scene->get_state().player->set_jump_state(SINGLE);
                     g_current_scene->get_state().player->jump();
-                    //Mix_PlayChannel(-1, g_state.jump_sfx, 0);
+                    Mix_PlayChannel(-1, g_current_scene->get_state().jump_sfx, 0);
                 }
-                else if (delta_jump > FIXED_JUMPTIME && g_current_scene->get_state().player->get_jump_state() == SINGLE) 
+                else if (g_screen_status != PAUSE && delta_jump > FIXED_JUMPTIME && g_current_scene->get_state().player->get_jump_state() == SINGLE)
                 {
                     g_current_scene->get_state().player->set_jump_state(DOUBLE);
                     g_current_scene->get_state().player->jump();
+                    Mix_PlayChannel(-1, g_current_scene->get_state().jump_sfx, 0);
                 }
                 break;
             }
@@ -327,10 +322,7 @@ void update()
 
     // changing view matrix
     g_view_matrix = glm::mat4(1.0f);
-
     g_view_matrix = glm::translate(g_view_matrix, glm::vec3(-g_current_scene->get_state().player->get_position().x, -g_current_scene->get_state().player->get_position().y, 0));
-
-
 }
 
 
@@ -345,7 +337,7 @@ void render()
     g_effects->render();
 
     // -- RENDERING THE LIVES -- //
-    if (g_screen_status == REGULAR) 
+    if (g_screen_status == REGULAR || g_screen_status == PAUSE) 
     {
         int lives_to_display = (GAME_LIVES >= 3) ? 3 : GAME_LIVES;
         for (int i = 0; i < lives_to_display; i++) 

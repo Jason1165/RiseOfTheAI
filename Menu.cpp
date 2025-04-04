@@ -4,10 +4,14 @@
 #define LEVEL_WIDTH 1
 #define LEVEL_HEIGHT 1
 
-GLuint fontsheet_id;
 constexpr char PLAYER_FILEPATH[] = "assets/sprites/char_run.png";
 constexpr char FONT_FILEPATH[] = "assets/sprites/modified_atari_font.png";
 constexpr char TILE_FILEPATH[] = "assets/sprites/updated_cake.png";
+
+constexpr char BGM_FILEPATH[] = "assets/audio/Cupids-Revenge.mp3";
+constexpr char JUMP_FILEPATH[] = "assets/audio/187024__lloydevans09__jump2.wav";
+constexpr char DEATH_FILEPATH[] = "assets/audio/157218__adamweeden__video-game-die-or-lose-life.wav";
+
 unsigned int MENU_DATA[] =
 {
     0
@@ -20,6 +24,7 @@ Menu::~Menu()
     delete    m_game_state.map;
     Mix_FreeChunk(m_game_state.jump_sfx);
     Mix_FreeMusic(m_game_state.bgm);
+    Mix_FreeChunk(m_game_state.death_sfx);
 }
 
 void Menu::initialise()
@@ -27,7 +32,6 @@ void Menu::initialise()
     m_game_state.next_scene_id = -1;
 
     GLuint map_texture_id = Utility::load_texture(TILE_FILEPATH);
-    fontsheet_id = Utility::load_texture(FONT_FILEPATH);
 
     // -- PLAYER -- //
     std::vector<std::vector<int>> player_walking_animation =
@@ -62,12 +66,12 @@ void Menu::initialise()
      BGM and SFX
      */
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
-
-    m_game_state.bgm = Mix_LoadMUS("assets/dooblydoo.mp3");
+    m_game_state.bgm = Mix_LoadMUS(BGM_FILEPATH);
     Mix_PlayMusic(m_game_state.bgm, -1);
-    Mix_VolumeMusic(0.0f);
+    Mix_VolumeMusic(MIX_MAX_VOLUME / 2);
 
-    m_game_state.jump_sfx = Mix_LoadWAV("assets/bounce.wav");
+    m_game_state.jump_sfx = Mix_LoadWAV(JUMP_FILEPATH);
+    m_game_state.death_sfx = Mix_LoadWAV(DEATH_FILEPATH);
 }
 
 bool Menu::update(float delta_time)
@@ -77,10 +81,10 @@ bool Menu::update(float delta_time)
 
 void Menu::render(ShaderProgram* program)
 {
-    std::string text_string("A Platformer Game");
+    GLuint fontsheet_id = Utility::load_texture(FONT_FILEPATH);
     m_game_state.player->render(program);
-    Utility::draw_text(program, fontsheet_id, text_string, 0.4f, 0.05f, glm::vec3(-3.5f, 2.0f, 0.0f));
+    Utility::draw_text(program, fontsheet_id, "A Platformer Game", 0.4f, 0.05f, glm::vec3(-3.5f, 2.0f, 0.0f));
     Utility::draw_text(program, fontsheet_id, "Press ENTER", 0.25f, 0.05f, glm::vec3(-1.3f, -2.0f, 0.0f));
-    Utility::draw_text(program, fontsheet_id, "to begin!", 0.25f, 0.05f, glm::vec3(-1.0f, -2.5f, 0.0f));
+    Utility::draw_text(program, fontsheet_id, "to START!", 0.25f, 0.05f, glm::vec3(-1.0f, -2.5f, 0.0f));
 
 }

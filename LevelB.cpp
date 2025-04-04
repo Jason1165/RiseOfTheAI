@@ -10,6 +10,12 @@ constexpr char PIG_FILEPATH[] = "assets/sprites/angry_pig.png";
 constexpr char CHICKEN_FILEPATH[] = "assets/sprites/chicken.png";
 constexpr char BAT_FILEPATH[] = "assets/sprites/bat.png";
 constexpr char BEE_FILEPATH[] = "assets/sprites/bee.png";
+constexpr char FONT_FILEPATH[] = "assets/sprites/modified_atari_font.png";
+
+constexpr char BGM_FILEPATH[] = "assets/audio/Cupids-Revenge.mp3";
+constexpr char JUMP_FILEPATH[] = "assets/audio/187024__lloydevans09__jump2.wav";
+constexpr char DEATH_FILEPATH[] = "assets/audio/157218__adamweeden__video-game-die-or-lose-life.wav";
+
 glm::vec3 LEVELB_END_FLAG = glm::vec3(17.0f, -19.0f, 0.0f);
 
 
@@ -64,6 +70,7 @@ LevelB::~LevelB()
     delete    m_game_state.map;
     Mix_FreeChunk(m_game_state.jump_sfx);
     Mix_FreeMusic(m_game_state.bgm);
+    Mix_FreeChunk(m_game_state.death_sfx);
 }
 
 void LevelB::initialise()
@@ -259,18 +266,23 @@ void LevelB::initialise()
      */
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
 
-    m_game_state.bgm = Mix_LoadMUS("assets/dooblydoo.mp3");
+    m_game_state.bgm = Mix_LoadMUS(BGM_FILEPATH);
     Mix_PlayMusic(m_game_state.bgm, -1);
-    Mix_VolumeMusic(0.0f);
+    Mix_VolumeMusic(MIX_MAX_VOLUME / 2);
 
-    m_game_state.jump_sfx = Mix_LoadWAV("assets/bounce.wav");
+    m_game_state.jump_sfx = Mix_LoadWAV(JUMP_FILEPATH);
+    m_game_state.death_sfx = Mix_LoadWAV(DEATH_FILEPATH);
 }
 
 bool LevelB::update(float delta_time)
 {
     bool collide_with_enemy = m_game_state.player->update(delta_time, m_game_state.player, m_game_state.enemies, LEVELB_ENEMY_COUNT, m_game_state.map);
     collide_with_enemy = collide_with_enemy || m_game_state.player->get_position().y < -40.0f;
-    if (collide_with_enemy) { initialise(); }
+    if (collide_with_enemy) 
+    { 
+        Mix_PlayChannel(-1, m_game_state.death_sfx, 0);
+        initialise(); 
+    }
 
     for (int i = 0; i < LEVELB_ENEMY_COUNT; i++) 
     {
@@ -293,4 +305,8 @@ void LevelB::render(ShaderProgram* program)
     {
         m_game_state.enemies[i].render(program);
     }
+
+    GLuint fontsheet_id = Utility::load_texture(FONT_FILEPATH);
+    Utility::draw_text(program, fontsheet_id, "<---", 0.2f, 0.0f, glm::vec3(23.0f, -9.0f, 0.0f));
+
 }

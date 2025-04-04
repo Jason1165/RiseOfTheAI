@@ -4,6 +4,7 @@
 #include "Map.h"
 #include "glm/glm.hpp"
 #include "ShaderProgram.h"
+#include "SDL_mixer.h"
 enum EntityType { PLATFORM, PLAYER, ENEMY };
 /*
     WALKER:     walks left and right between two bounds with no perception of Player
@@ -74,6 +75,9 @@ private:
 
     glm::vec3 m_left_collider;
     glm::vec3 m_right_collider;
+
+    // ----- SOUND ----- //
+    Mix_Chunk* m_sound_sfx = nullptr;
 
 public:
     // ————— STATIC VARIABLES ————— //
@@ -176,6 +180,14 @@ public:
 
     // CHEATS CAUSE I NEED THEM
     void let_me_move_faster(float multi){ m_movement.x *= multi;}
+
+    // SOUND
+    void set_sound(const char* filepath) 
+    {
+        Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
+        Mix_VolumeMusic(MIX_MAX_VOLUME / 2);
+        m_sound_sfx = Mix_LoadWAV(filepath);
+    }
 };
 
 #endif // ENTITY_H

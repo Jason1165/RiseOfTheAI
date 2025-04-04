@@ -10,6 +10,13 @@ constexpr char PIG_FILEPATH[] = "assets/sprites/angry_pig.png";
 constexpr char CHICKEN_FILEPATH[] = "assets/sprites/chicken.png";
 constexpr char BAT_FILEPATH[] = "assets/sprites/bat.png";
 constexpr char BEE_FILEPATH[] = "assets/sprites/bee.png";
+constexpr char FONT_FILEPATH[] = "assets/sprites/modified_atari_font.png";
+
+constexpr char BGM_FILEPATH[] = "assets/audio/Cupids-Revenge.mp3";
+constexpr char JUMP_FILEPATH[] = "assets/audio/187024__lloydevans09__jump2.wav";
+constexpr char DEATH_FILEPATH[] = "assets/audio/157218__adamweeden__video-game-die-or-lose-life.wav";
+constexpr char CHICKEN_SOUND[] = "assets/audio/475733__dogwomble__rubber-chicken-2.wav";
+
 glm::vec3 LEVELC_END_FLAG = glm::vec3(48.0f, -3.0f, 0.0f);
 
 
@@ -54,6 +61,7 @@ LevelC::~LevelC()
     delete    m_game_state.map;
     Mix_FreeChunk(m_game_state.jump_sfx);
     Mix_FreeMusic(m_game_state.bgm);
+    Mix_FreeChunk(m_game_state.death_sfx);
 }
 
 void LevelC::initialise()
@@ -131,6 +139,8 @@ void LevelC::initialise()
         m_game_state.enemies[i].face_left();
         m_game_state.enemies[i].set_ai_type(GUARD);
         m_game_state.enemies[i].set_ai_state(IDLE);
+        m_game_state.enemies[i].set_sound(CHICKEN_SOUND);
+
     }
 
     // ENEMY 10-12 PIGS
@@ -313,18 +323,23 @@ void LevelC::initialise()
      */
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
 
-    m_game_state.bgm = Mix_LoadMUS("assets/dooblydoo.mp3");
+    m_game_state.bgm = Mix_LoadMUS(BGM_FILEPATH);
     Mix_PlayMusic(m_game_state.bgm, -1);
-    Mix_VolumeMusic(0.0f);
+    Mix_VolumeMusic(MIX_MAX_VOLUME / 2);
 
-    m_game_state.jump_sfx = Mix_LoadWAV("assets/bounce.wav");
+    m_game_state.jump_sfx = Mix_LoadWAV(JUMP_FILEPATH);
+    m_game_state.death_sfx = Mix_LoadWAV(DEATH_FILEPATH);
 }
 
 bool LevelC::update(float delta_time)
 {
     bool collide_with_enemy = m_game_state.player->update(delta_time, m_game_state.player, m_game_state.enemies, LEVELC_ENEMY_COUNT, m_game_state.map);
     collide_with_enemy = collide_with_enemy || m_game_state.player->get_position().y < -30.0f;
-    if (collide_with_enemy) { initialise(); }
+    if (collide_with_enemy) 
+    { 
+        Mix_PlayChannel(-1, m_game_state.death_sfx, 0);
+        initialise(); 
+    }
 
     for (int i = 0; i < LEVELC_ENEMY_COUNT; i++) 
     {

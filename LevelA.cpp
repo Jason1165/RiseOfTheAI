@@ -11,6 +11,13 @@ constexpr char PIG_FILEPATH[] = "assets/sprites/angry_pig.png";
 constexpr char CHICKEN_FILEPATH[] = "assets/sprites/chicken.png";
 constexpr char BAT_FILEPATH[] = "assets/sprites/bat.png";
 constexpr char BEE_FILEPATH[] = "assets/sprites/bee.png";
+constexpr char FONT_FILEPATH[] = "assets/sprites/modified_atari_font.png";
+
+constexpr char BGM_FILEPATH[] = "assets/audio/Cupids-Revenge.mp3";
+constexpr char JUMP_FILEPATH[] = "assets/audio/187024__lloydevans09__jump2.wav";
+constexpr char DEATH_FILEPATH[] = "assets/audio/157218__adamweeden__video-game-die-or-lose-life.wav";
+constexpr char CHICKEN_SOUND[] = "assets/audio/475733__dogwomble__rubber-chicken-2.wav";
+
 glm::vec3 LEVELA_END_FLAG = glm::vec3(32.0f, -1.0f, 0.0f);
 
 
@@ -45,6 +52,7 @@ LevelA::~LevelA()
     delete    m_game_state.map;
     Mix_FreeChunk(m_game_state.jump_sfx);
     Mix_FreeMusic(m_game_state.bgm);
+    Mix_FreeChunk(m_game_state.death_sfx);
 }
 
 void LevelA::initialise()
@@ -86,7 +94,6 @@ void LevelA::initialise()
     // -- ENEMIES -- //
     GLuint pig_texture_id = Utility::load_texture(PIG_FILEPATH);
     GLuint chicken_texture_id = Utility::load_texture(CHICKEN_FILEPATH);
-
 
     m_game_state.enemies = new Entity[LEVELA_ENEMY_COUNT];
 
@@ -148,6 +155,7 @@ void LevelA::initialise()
     m_game_state.enemies[1].face_left();
     m_game_state.enemies[1].set_ai_type(GUARD);
     m_game_state.enemies[1].set_ai_state(IDLE);
+    m_game_state.enemies[1].set_sound(CHICKEN_SOUND);
 
     // ENEMY_TWO
     m_game_state.enemies[2] = Entity(
@@ -177,18 +185,23 @@ void LevelA::initialise()
      */
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
 
-    m_game_state.bgm = Mix_LoadMUS("assets/dooblydoo.mp3");
+    m_game_state.bgm = Mix_LoadMUS(BGM_FILEPATH);
     Mix_PlayMusic(m_game_state.bgm, -1);
-    Mix_VolumeMusic(0.0f);
+    Mix_VolumeMusic(MIX_MAX_VOLUME / 2);
 
-    m_game_state.jump_sfx = Mix_LoadWAV("assets/bounce.wav");
+    m_game_state.jump_sfx = Mix_LoadWAV(JUMP_FILEPATH);
+    m_game_state.death_sfx = Mix_LoadWAV(DEATH_FILEPATH);
 }
 
 bool LevelA::update(float delta_time)
 {
     bool collide_with_enemy = m_game_state.player->update(delta_time, m_game_state.player, m_game_state.enemies, LEVELA_ENEMY_COUNT, m_game_state.map);
     collide_with_enemy = collide_with_enemy || m_game_state.player->get_position().y < -20.0f;
-    if (collide_with_enemy) { initialise(); }
+    if (collide_with_enemy) 
+    { 
+        Mix_PlayChannel(-1, m_game_state.death_sfx, 0);
+        initialise(); 
+    }
 
     for (int i = 0; i < LEVELA_ENEMY_COUNT; i++) 
     {
@@ -213,4 +226,11 @@ void LevelA::render(ShaderProgram* program)
     {
         m_game_state.enemies[i].render(program);
     }
+
+    GLuint fontsheet_id = Utility::load_texture(FONT_FILEPATH);
+    Utility::draw_text(program, fontsheet_id, "Use the Arrow Keys", 0.2f, 0.0f, glm::vec3(6.0f, -12.0f, 0.0f));
+    Utility::draw_text(program, fontsheet_id, "to Move", 0.2f, 0.0f, glm::vec3(7.0f, -12.5f, 0.0f));
+    Utility::draw_text(program, fontsheet_id, "JUMP", 0.2f, 0.0f, glm::vec3(12.25f, -12.25f, 0.0f));
+    Utility::draw_text(program, fontsheet_id, "DOUBLE JUMP", 0.2f, 0.0f, glm::vec3(17.5f, -11.75f, 0.0f));
+
 }

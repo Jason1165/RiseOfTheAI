@@ -55,9 +55,10 @@ void Entity::ai_guard(Entity* player)
     case IDLE:
         if (glm::distance(m_position, player->get_position()) < 5.0f && fabs(m_position.y - player->get_position().y) < 0.5f) 
         {
-            m_ai_state = CHARGE;
             if (player->get_position().x < m_position.x) 
             {
+                Mix_PlayChannel(-1, m_sound_sfx, 0);
+                m_ai_state = CHARGE;
                 m_movement = glm::vec3(-0.1f, 0.0f, 0.0f);
                 m_acceleration.y = -100.0f; // just to make sure they fall to their death ...
             }
@@ -91,7 +92,6 @@ void Entity::ai_flyer()
     {
         m_velocity.y *= -1.0f;
     }
-
     if (glm::distance(m_position, m_left_collider) < 1.0f) 
     {
         m_movement.x *= -1.0f;
@@ -185,7 +185,9 @@ m_texture_id(texture_id), m_velocity(0.0f), m_acceleration(0.0f), m_width(width)
     //    for (int j = 0; j < SECONDS_PER_FRAME; ++j) m_walking[i][j] = 0;
 }
 
-Entity::~Entity() {}
+Entity::~Entity() {
+    Mix_FreeChunk(m_sound_sfx);
+}
 
 void Entity::draw_sprite_from_texture_atlas(ShaderProgram* program, GLuint texture_id, int index)
 {
